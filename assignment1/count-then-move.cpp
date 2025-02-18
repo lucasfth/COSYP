@@ -8,6 +8,7 @@
 # include <iostream>
 # include <fstream>
 # include <thread>
+# include <vector>
 using namespace std;
 
 const int NUM_THREADS = 4; // Number of threads
