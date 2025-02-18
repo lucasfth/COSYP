@@ -33,3 +33,5 @@
 
 # IDE settings
 .vscode/
+
+**/build/*
