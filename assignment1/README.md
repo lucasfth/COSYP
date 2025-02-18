@@ -3,7 +3,7 @@
 Compile and run the code using the following command:
 
 ```shell
-g++ -o <program name>.cpp -std=c++11 -pthread
+g++ <program name>.cpp -std=c++11 -pthread -o <program name>
 ```
 
 To see the output write the following:
