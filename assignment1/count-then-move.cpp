@@ -11,8 +11,8 @@
 using namespace std;
 
 const int NUM_THREADS = 4; // Number of threads
-const int NUM_OF_HASHBITS = 3; // Number of hash bits
-const int NUM_OF_BUCKETS = 1 << NUM_OF_HASHBITS; // Number of buckets
+const int NUM_HASHBITS = 3; // Number of hash bits
+const int NUM_BUCKETS = 1 << NUM_HASHBITS; // Number of buckets
 std::vector<int> data = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}; // Data to partition
 
 /**
@@ -21,7 +21,7 @@ std::vector<int> data = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 
  * @return The partition for the number.
  */
 int get_partition(int n) {
-  return n % NUM_OF_BUCKETS;
+  return n % NUM_BUCKETS;
 }
 
 /**
@@ -57,13 +57,13 @@ void compute_offset(const vector<vector<int>>& local_counts, vector<int>& global
   vector<int> partition_offsets(NUM_THREADS, 0);
 
   for (int i = 0; i < NUM_THREADS; i++) {
-    for (int j = 0; j < NUM_OF_BUCKETS; j++) {
+    for (int j = 0; j < NUM_BUCKETS; j++) {
       partition_offsets[j] += local_counts[i][j];
     }
   }
 
   int offset = 0;
-  for (int i = 0; i < NUM_OF_BUCKETS; i++) {
+  for (int i = 0; i < NUM_BUCKETS; i++) {
     global_offsets[i] = offset;
     offset += partition_offsets[i];
   }
@@ -85,7 +85,7 @@ void move_elements(const vector<int>& input_data, vector<int>& output, const vec
 
   // Adjust offsets to account for the other threads
   for (int i = 0; i < thread_id; i++) {
-    for (int j = 0; j < NUM_OF_BUCKETS; j++) {
+    for (int j = 0; j < NUM_BUCKETS; j++) {
       local_offsets[j] += local_counts[i][j];
     }
   }
@@ -116,8 +116,8 @@ void print_output(vector<int> output) {
 int main() {
   int data_size = ::data.size(); // Size of the data
 
-  vector<vector<int>> local_counts(NUM_OF_BUCKETS, vector<int>(NUM_OF_BUCKETS, 0)); // Local counts for each partition
-  vector<int> global_offsets(NUM_OF_BUCKETS, 0); // Global offsets for each partition
+  vector<vector<int>> local_counts(NUM_BUCKETS, vector<int>(NUM_BUCKETS, 0)); // Local counts for each partition
+  vector<int> global_offsets(NUM_BUCKETS, 0); // Global offsets for each partition
   vector<int> output(data_size); // Output vector to store the elements
 
   vector<thread> threads; // Vector to store the threads
