@@ -14,7 +14,15 @@ using namespace std;
 const int NUM_THREADS = 4; // Number of threads
 const int NUM_OF_HASHBITS = 4; // Number of hash bits
 const int NUM_OF_BUCKETS = 1 << NUM_OF_HASHBITS; // Number of buckets
-std::vector<int> data = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}; // Data to partition
+const int DATA_SIZE = 100; // Size of the data
+
+vector<int> get_data_given_n(int n) {
+  vector<int> data(n);
+  for (int i = 0; i < n; i++) {
+    data[i] = i+1;
+  }
+  return data;
+}
 
 /**
  * Get the partition for a number.
@@ -115,22 +123,23 @@ void print_output(vector<int> output) {
  * @return The exit status of the program.
  */
 int main() {
-  int data_size = ::data.size(); // Size of the data
+  // int data_size = ::data.size(); // Size of the data
+  vector<int> data = get_data_given_n(DATA_SIZE);
 
   vector<vector<int>> local_counts(NUM_THREADS, vector<int>(NUM_OF_BUCKETS, 0)); // Local counts for each partition
   vector<int> global_offsets(NUM_OF_BUCKETS, 0); // Global offsets for each partition
-  vector<int> output(data_size); // Output vector to store the elements
+  vector<int> output(DATA_SIZE); // Output vector to store the elements
 
   vector<thread> threads; // Vector to store the threads
-  int chunk_size = compute_chunk_size(data_size); // Compute the chunk size for each thread
+  int chunk_size = compute_chunk_size(DATA_SIZE); // Compute the chunk size for each thread
 
   // First pass where the number of elements in each partition is counted
   for (int i = 0; i < NUM_THREADS; i++) {
     int start = i * chunk_size; // Start index of the data
     // End index of the data - ternary is used to handle edge case of giving the last thread the remaining elements, if the data is not divisible by the number of threads
-    int end = (i == NUM_THREADS - 1) ? data_size : start + chunk_size;
+    int end = (i == NUM_THREADS - 1) ? DATA_SIZE : start + chunk_size;
     // Create a thread to count the number of elements in each partition
-    threads.emplace_back(count_partition, cref(::data), ref(local_counts), i, start, end);
+    threads.emplace_back(count_partition, data, ref(local_counts), i, start, end);
   }
 
   // Wait for all threads to finish
@@ -147,9 +156,9 @@ int main() {
   // Second pass where elements are moved to the correct position
   for (int i = 0; i < NUM_THREADS; i++) {
     int start = i * chunk_size; // Start index of the data
-    int end = (i == NUM_THREADS - 1) ? data_size : start + chunk_size; // End index of the data
+    int end = (i == NUM_THREADS - 1) ? DATA_SIZE : start + chunk_size; // End index of the data
     // Create a thread to move the elements to the correct position
-    threads.emplace_back(move_elements, cref(::data), ref(output), cref(local_counts), cref(global_offsets), i, start, end);
+    threads.emplace_back(move_elements, data, ref(output), cref(local_counts), cref(global_offsets), i, start, end);
   }
 
   // Wait for all threads to finish

@@ -22,7 +22,7 @@ vector<tuple<int64_t, int64_t>> get_data_given_n(int n) {
  * @param n The number to get the partition for.
  * @return The partition for the number.
  */
-int get_partition(int n) {
+int get_partition(int64_t n) {
   return n % NUM_BUCKETS;
 }
 
@@ -47,6 +47,12 @@ void print_output(vector<tuple<int64_t, int64_t>> output) {
   cout << endl;
 }
 
+vector<atomic<int>> counter{};
+
+int increment_buffer_counter(int id) {
+    return counter[id]++;
+}
+
 /**
 * Main function to run the program.
 * @return The exit status of the program.
@@ -54,7 +60,9 @@ void print_output(vector<tuple<int64_t, int64_t>> output) {
 int main() {
   auto data = get_data_given_n(DATA_SIZE);
 
-  outbuffer_counters
+  // What is supposed to go here? Plz help copilot
+  int chunk_size = compute_input_chunk_size(DATA_SIZE);
+  // R
 
   print_output(data);
   // vector<vector<int>> local_counts(NUM_THREADS, vector<int>(NUM_BUCKETS, 0)); // Initialize a 2D vector of size NUM_THREADS x NUM_BUCKETS with 0s
