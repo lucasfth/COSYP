@@ -35,20 +35,27 @@ int compute_input_chunk_size(int data_size) {
   return data_size / NUM_THREADS;
 }
 
+void move_element(const tuple<int64_t, int64_t>& input_data, vector<vector<tuple<int64_t, int64_t>>> buffers) {
+  int partition = get_partition(get<0>(input_data));
+  buffers[partition][increment_buffer_counter(partition)] = input_data;
+}
+
 /**
 * Print the output vector.
 * @param output The output vector to print.
 */
-void print_output(vector<tuple<int64_t, int64_t>> output) {
+void print_output(vector<vector<tuple<int64_t, int64_t>>> output) {
   cout << "Data: [ ";
   for (int i = 0; i < output.size(); i++) {
-    cout << "(" << get<0>(output[i]) << ", " << get<1>(output[i]) << ")" << (i == output.size() - 1 ? " ]" : ", ");
+    for (int j = 0; j < output[i].size(); j++) {
+      cout << "(" << get<0>(output[i][j]) << ", " << get<1>(output[i][j]) << ")" << (j == output[i].size() - 1 ? " ]" : ", ");
+    }
+    cout << endl;
   }
   cout << endl;
 }
 
 vector<atomic<int>> counter{};
-
 int increment_buffer_counter(int id) {
     return counter[id]++;
 }
@@ -60,11 +67,24 @@ int increment_buffer_counter(int id) {
 int main() {
   auto data = get_data_given_n(DATA_SIZE);
 
-  // What is supposed to go here? Plz help copilot
   int chunk_size = compute_input_chunk_size(DATA_SIZE);
-  // R
 
-  print_output(data);
+  vector<thread> threads;
+  vector<vector<tuple<int64_t, int64_t>>> buffers(NUM_BUCKETS, vector<tuple<int64_t, int64_t>>(DATA_SIZE));
+  counter.resize(NUM_BUCKETS, 0);
+
+  for (int i = 0; i < NUM_THREADS; i++) {
+    int start = i * chunk_size;
+    int end = (i == NUM_THREADS - 1) ? DATA_SIZE : start + chunk_size;
+    threads.push_back(thread([start, end, &data, &buffers]() {
+      for (int i = start; i < end; i++) {
+        move_element(data[i], buffers);
+      }
+    }));
+  }
+
+
+  print_output(buffers);
   // vector<vector<int>> local_counts(NUM_THREADS, vector<int>(NUM_BUCKETS, 0)); // Initialize a 2D vector of size NUM_THREADS x NUM_BUCKETS with 0s
   // int offset = 0; // Offset for the data
   // int
