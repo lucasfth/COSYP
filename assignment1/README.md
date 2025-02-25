@@ -13,5 +13,5 @@ make clean # removes binary files
 To see the output write the following:
 
 ```bash
-./<program name>
+./build/<program name>
 ```

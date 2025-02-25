@@ -11,7 +11,7 @@ using namespace std;
 const int NUM_THREADS = 4; // Number of threads
 const int NUM_HASHBITS = 3; // Number of hash bits
 const int NUM_BUCKETS = 1 << NUM_HASHBITS; // Number of buckets
-const int DATA_SIZE = 20; // Size of the data
+const int DATA_SIZE = 100; // Size of the data
 
 // Use individual atomic integers instead of atomic array
 array<atomic<int>, NUM_BUCKETS> counter;
@@ -86,8 +86,6 @@ int main() {
   }
 
   auto data = get_data_given_n(DATA_SIZE);
-
-  print_input(data);
 
   int chunk_size = compute_input_chunk_size(DATA_SIZE);
 

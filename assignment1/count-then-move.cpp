@@ -9,6 +9,8 @@
 # include <fstream>
 # include <thread>
 # include <vector>
+# include <tuple>
+
 using namespace std;
 
 const int NUM_THREADS = 4; // Number of threads
@@ -16,10 +18,10 @@ const int NUM_OF_HASHBITS = 4; // Number of hash bits
 const int NUM_OF_BUCKETS = 1 << NUM_OF_HASHBITS; // Number of buckets
 const int DATA_SIZE = 100; // Size of the data
 
-vector<int> get_data_given_n(int n) {
-  vector<int> data(n);
-  for (int i = 0; i < n; i++) {
-    data[i] = i+1;
+vector<tuple<int64_t, int64_t>> get_data_given_n(int n) {
+  vector<tuple<int64_t, int64_t>> data(n);
+  for (int64_t i = 0; i < n; i++) {
+    data[i] = tuple<int64_t, int64_t>(i+1, i+1);
   }
   return data;
 }
@@ -41,9 +43,9 @@ int get_partition(int n) {
  * @param start The start index of the data.
  * @param end The end index of the data.
  */
-void count_partition(const vector<int>& input_data, vector<vector<int>>& local_counts, int thread_id, int start, int end) {
+void count_partition(const vector<tuple<int64_t, int64_t>>& input_data, vector<vector<int>>& local_counts, int thread_id, int start, int end) {
   for (int i = start; i < end; i++) {
-    int partition = get_partition(input_data[i]);
+    int partition = get_partition(get<0>(input_data[i]));
     local_counts[thread_id][partition]++;
   }
 }
@@ -88,7 +90,7 @@ void compute_offset(const vector<vector<int>>& local_counts, vector<int>& global
  * @param start The start index of the data.
  * @param end The end index of the data.
  */
-void move_elements(const vector<int>& input_data, vector<int>& output, const vector<vector<int>>& local_counts, vector<int> global_offsets,
+void move_elements(const vector<tuple<int64_t, int64_t>>& input_data, vector<tuple<int64_t, int64_t>>& output, const vector<vector<int>>& local_counts, vector<int> global_offsets,
                    int thread_id, int start, int end) {
   vector<int> local_offsets = global_offsets;
 
@@ -101,7 +103,7 @@ void move_elements(const vector<int>& input_data, vector<int>& output, const vec
 
   // Move elements to the correct position
   for (int i = start; i < end; i++) {
-    int partition = get_partition(input_data[i]);
+    int partition = get_partition(get<0>(input_data[i]));
     output[local_offsets[partition]++] = input_data[i];
   }
 }
@@ -110,10 +112,10 @@ void move_elements(const vector<int>& input_data, vector<int>& output, const vec
  * Print the output vector.
  * @param output The output vector to print.
  */
-void print_output(vector<int> output) {
-  cout << "Output: [ ";
+void print_output(vector<tuple<int64_t, int64_t>> output) {
+  cout << "Data: [ ";
   for (int i = 0; i < output.size(); i++) {
-    cout << output[i] << (i == output.size() - 1 ? " ]" : ", ");
+    cout << "(" << get<0>(output[i]) << ", " << get<1>(output[i]) << ")" << (i == output.size() - 1 ? " ]" : ", ");
   }
   cout << endl;
 }
@@ -123,12 +125,11 @@ void print_output(vector<int> output) {
  * @return The exit status of the program.
  */
 int main() {
-  // int data_size = ::data.size(); // Size of the data
-  vector<int> data = get_data_given_n(DATA_SIZE);
+  vector<tuple<int64_t, int64_t>> data = get_data_given_n(DATA_SIZE);
 
   vector<vector<int>> local_counts(NUM_THREADS, vector<int>(NUM_OF_BUCKETS, 0)); // Local counts for each partition
   vector<int> global_offsets(NUM_OF_BUCKETS, 0); // Global offsets for each partition
-  vector<int> output(DATA_SIZE); // Output vector to store the elements
+  vector<tuple<int64_t, int64_t>> output(DATA_SIZE); // Output vector to store the elements
 
   vector<thread> threads; // Vector to store the threads
   int chunk_size = compute_chunk_size(DATA_SIZE); // Compute the chunk size for each thread
