@@ -9,3 +9,5 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Add the executable
 add_executable(count-then-move count-then-move.cpp)
+
+add_executable(concurrent-output concurrent-output.cpp)
