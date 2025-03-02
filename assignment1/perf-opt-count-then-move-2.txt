@@ -1,0 +1,22 @@
+# started on Sun Mar  2 13:11:42 2025
+
+
+ Performance counter stats for './build/count-then-move':
+
+    13,589,414,912      cycles                                                                  (50.13%)
+    13,509,112,218      instructions                     #    0.99  insn per cycle              (60.12%)
+         4,390,136      L1-icache-load-misses                                                   (60.04%)
+        47,487,438      L1-dcache-load-misses                                                   (59.99%)
+           193,750      LLC-load-misses                                                         (60.04%)
+        29,144,552      cache-misses                                                            (59.98%)
+     7,579,479,896      uops_retired.stall_cycles                                               (40.03%)
+           296,169      branch-misses                                                           (40.05%)
+           205,261      iTLB-load-misses                                                        (40.08%)
+           185,324      dTLB-load-misses                                                        (40.12%)
+
+       1.161369751 seconds time elapsed
+
+       6.708700000 seconds user
+       0.249839000 seconds sys
+
+
