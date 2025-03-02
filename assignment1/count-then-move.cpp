@@ -1,30 +1,49 @@
 /**
-* This program counts the number of elements in each partition and then moves the elements to the correct position.
-* The program uses two passes to achieve this. The first pass counts the number of elements in each partition and the
-* second pass moves the elements to the correct position.
-* The numbers are partitioned based on the remainder of the number divided by the number of threads.
-*/
+ * This program counts the number of elements in each partition and then moves the elements to the correct position.
+ * The program uses two passes to achieve this. The first pass counts the number of elements in each partition and the
+ * second pass moves the elements to the correct position.
+ * The numbers are partitioned based on the remainder of the number divided by the number of threads.
+ */
 
-# include <iostream>
-# include <fstream>
-# include <thread>
-# include <vector>
-# include <tuple>
+#include <iostream>
+#include <fstream>
+#include <thread>
+#include <vector>
+#include <tuple>
+#include <atomic>
+#include <chrono>
 
 using namespace std;
+using namespace std::chrono;
 
-const int NUM_THREADS = 8; // Number of threads
-const int NUM_OF_HASHBITS = 8; // Number of hash bits
+const int NUM_THREADS = 8;                       // Number of threads
+const int NUM_OF_HASHBITS = 8;                   // Number of hash bits
 const int NUM_OF_BUCKETS = 1 << NUM_OF_HASHBITS; // Number of buckets
-const int DATA_SIZE = 1<<24; // Size of the data
-const bool debug = false; // Debug flag
+const int DATA_SIZE = 1 << 24;                   // Size of the data
+const bool debug = false;                        // Debug flag
 
-vector<tuple<int64_t, int64_t>> get_data_given_n(int n) {
-  vector<tuple<int64_t, int64_t>> data(n);
-  for (int64_t i = 0; i < n; i++) {
-    data[i] = tuple<int64_t, int64_t>(i+1, i+1);
+// Use atomic counters for thread-safe operations
+array<atomic<int>, NUM_OF_BUCKETS> counter;
+
+vector<tuple<int32_t, int32_t>> get_data_given_n(int n)
+{
+  vector<tuple<int32_t, int32_t>> data(n);
+  for (int32_t i = 0; i < n; i++)
+  {
+    auto num = (i + 1) % NUM_OF_BUCKETS;
+    data[i] = tuple<int32_t, int32_t>(i + 1, i + 1);
   }
   return data;
+}
+
+// Add some computation to better demonstrate multi-core benefits
+void do_computation(tuple<int32_t, int32_t> &item)
+{
+  // Simple but non-trivial computation
+  for (int i = 0; i < 50; i++)
+  {
+    get<1>(item) = (get<0>(item) * get<1>(item) + i) % 10000;
+  }
 }
 
 /**
@@ -32,23 +51,9 @@ vector<tuple<int64_t, int64_t>> get_data_given_n(int n) {
  * @param n The number to get the partition for.
  * @return The partition for the number.
  */
-int get_partition(int n) {
+int get_partition(int32_t n)
+{
   return n % NUM_OF_BUCKETS;
-}
-
-/**
- * Count the number of elements in each partition.
- * @param input_data The data to count the partitions for.
- * @param local_counts The local counts for each partition.
- * @param thread_id The id of the thread.
- * @param start The start index of the data.
- * @param end The end index of the data.
- */
-void count_partition(const vector<tuple<int64_t, int64_t>>& input_data, vector<vector<int>>& local_counts, int thread_id, int start, int end) {
-  for (int i = start; i < end; i++) {
-    int partition = get_partition(get<0>(input_data[i]));
-    local_counts[thread_id][partition]++;
-  }
 }
 
 /**
@@ -56,56 +61,50 @@ void count_partition(const vector<tuple<int64_t, int64_t>>& input_data, vector<v
  * @param data_size The size of the data.
  * @return The chunk size for each thread.
  */
-int compute_chunk_size(int data_size) {
+int compute_chunk_size(int data_size)
+{
   return data_size / NUM_THREADS;
 }
 
 /**
- * Compute the global offsets for each partition.
- * @param local_counts The local counts for each partition.
- * @param global_offsets The global offsets for each partition.
+ * Atomically increment the counter for a bucket and return the previous value.
  */
-void compute_offset(const vector<vector<int>>& local_counts, vector<int>& global_offsets) {
-  vector<int> partition_offsets(NUM_OF_BUCKETS, 0);
-
-  for (int i = 0; i < NUM_THREADS; i++) {
-    for (int j = 0; j < NUM_OF_BUCKETS; j++) {
-      partition_offsets[j] += local_counts[i][j];
-    }
-  }
-
-  int offset = 0;
-  for (int i = 0; i < NUM_OF_BUCKETS; i++) {
-    global_offsets[i] = offset;
-    offset += partition_offsets[i];
-  }
+int increment_buffer_counter(int id)
+{
+  return counter[id]++;
 }
 
 /**
- * Move elements to the correct position.
- * @param input_data The data to move.
- * @param output The output vector to store the elements.
- * @param local_counts The local counts for each partition.
- * @param global_offsets The global offsets for each partition.
- * @param thread_id The id of the thread.
- * @param start The start index of the data.
- * @param end The end index of the data.
+ * Move an element to its destination buffer.
  */
-void move_elements(const vector<tuple<int64_t, int64_t>>& input_data, vector<tuple<int64_t, int64_t>>& output, const vector<vector<int>>& local_counts, vector<int> global_offsets,
-                   int thread_id, int start, int end) {
-  vector<int> local_offsets = global_offsets;
+void move_element(const tuple<int32_t, int32_t> &item, vector<vector<tuple<int32_t, int32_t>>> &buffers)
+{
+  int partition = get_partition(get<0>(item));
+  int pos = increment_buffer_counter(partition);
+  buffers[partition][pos] = item;
+}
 
-  // Adjust offsets to account for the other threads
-  for (int i = 0; i < thread_id; i++) {
-    for (int j = 0; j < NUM_OF_BUCKETS; j++) {
-      local_offsets[j] += local_counts[i][j];
-    }
-  }
+/**
+ * Process a chunk of data with affinity to a specific CPU core.
+ * This function handles both computation and data movement in a single pass.
+ */
+void process_chunk(int thread_id, int start, int end,
+                   const vector<tuple<int32_t, int32_t>> &data,
+                   vector<vector<tuple<int32_t, int32_t>>> &buffers)
+{
 
-  // Move elements to the correct position
-  for (int i = start; i < end; i++) {
-    int partition = get_partition(get<0>(input_data[i]));
-    output[local_offsets[partition]++] = input_data[i];
+  // Set thread affinity to specific CPU core
+  cpu_set_t cpuset;
+  CPU_ZERO(&cpuset);
+  // Use modulo in case we have more threads than cores
+  CPU_SET(thread_id % thread::hardware_concurrency(), &cpuset);
+  pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+
+  for (int j = start; j < end; j++)
+  {
+    auto item = data[j];
+    do_computation(item); // Do some actual computation
+    move_element(item, buffers);
   }
 }
 
@@ -113,65 +112,68 @@ void move_elements(const vector<tuple<int64_t, int64_t>>& input_data, vector<tup
  * Print the output vector.
  * @param output The output vector to print.
  */
-void print_output(vector<tuple<int64_t, int64_t>> output) {
-  cout << "Data: [ ";
-  for (int i = 0; i < output.size(); i++) {
-    cout << "(" << get<0>(output[i]) << ", " << get<1>(output[i]) << ")" << (i == output.size() - 1 ? " ]" : ", ");
+void print_output(const vector<vector<tuple<int32_t, int32_t>>> &buffers)
+{
+  cout << "Data (first 10 elements from each partition): " << endl;
+  for (int i = 0; i < NUM_OF_BUCKETS; i++)
+  {
+    cout << "Partition " << i << " (size: " << counter[i] << "): ";
+    int elements_to_print = min(10, counter[i].load());
+    for (int j = 0; j < elements_to_print; j++)
+    {
+      cout << "(" << get<0>(buffers[i][j]) << "," << get<1>(buffers[i][j]) << ") ";
+    }
+    cout << endl;
   }
-  cout << endl;
 }
 
 /**
  * Main function to run the program.
  * @return The exit status of the program.
  */
-int main() {
-  vector<tuple<int64_t, int64_t>> data = get_data_given_n(DATA_SIZE);
+int main()
+{
+  cout << "Number of available CPU cores: " << thread::hardware_concurrency() << endl;
 
-  vector<vector<int>> local_counts(NUM_THREADS, vector<int>(NUM_OF_BUCKETS, 0)); // Local counts for each partition
-  vector<int> global_offsets(NUM_OF_BUCKETS, 0); // Global offsets for each partition
-  vector<tuple<int64_t, int64_t>> output(DATA_SIZE); // Output vector to store the elements
+  // Initialize atomic counters
+  for (int i = 0; i < NUM_OF_BUCKETS; i++)
+  {
+    counter[i] = 0;
+  }
 
-  vector<thread> threads; // Vector to store the threads
-  int chunk_size = compute_chunk_size(DATA_SIZE); // Compute the chunk size for each thread
+  auto data = get_data_given_n(DATA_SIZE);
+  int chunk_size = compute_chunk_size(DATA_SIZE);
 
-  // First pass where the number of elements in each partition is counted
-  for (int i = 0; i < NUM_THREADS; i++) {
-    int start = i * chunk_size; // Start index of the data
-    // End index of the data - ternary is used to handle edge case of giving the last thread the remaining elements, if the data is not divisible by the number of threads
+  vector<thread> threads;
+  // Create output buffers for each partition
+  vector<vector<tuple<int32_t, int32_t>>> buffers(NUM_OF_BUCKETS, vector<tuple<int32_t, int32_t>>(DATA_SIZE / NUM_OF_BUCKETS + 1));
+
+  auto start_time = high_resolution_clock::now();
+
+  // Launch threads to process data chunks concurrently
+  for (int i = 0; i < NUM_THREADS; i++)
+  {
+    int start = i * chunk_size;
     int end = (i == NUM_THREADS - 1) ? DATA_SIZE : start + chunk_size;
-    // Create a thread to count the number of elements in each partition
-    threads.emplace_back(count_partition, data, ref(local_counts), i, start, end);
+    threads.push_back(thread(process_chunk, i, start, end, ref(data), ref(buffers)));
   }
 
-  // Wait for all threads to finish
-  for (auto& th : threads) {
-    th.join();
+  // Wait for all threads to complete
+  for (auto &t : threads)
+  {
+    t.join();
   }
 
-  // Compute the global offsets for each partition
-  compute_offset(local_counts, global_offsets);
+  auto end_time = high_resolution_clock::now();
+  auto duration = duration_cast<milliseconds>(end_time - start_time);
 
-  // Clear the threads vector before the second pass
-  threads.clear();
+  cout << "Processing time: " << duration.count() << " ms with " << NUM_THREADS << " threads" << endl;
 
-  // Second pass where elements are moved to the correct position
-  for (int i = 0; i < NUM_THREADS; i++) {
-    int start = i * chunk_size; // Start index of the data
-    int end = (i == NUM_THREADS - 1) ? DATA_SIZE : start + chunk_size; // End index of the data
-    // Create a thread to move the elements to the correct position
-    threads.emplace_back(move_elements, data, ref(output), cref(local_counts), cref(global_offsets), i, start, end);
+  // Print results if debug flag is set
+  if (debug)
+  {
+    print_output(buffers);
   }
 
-  // Wait for all threads to finish
-  for (auto& th : threads) {
-    th.join();
-  }
-
-  if (debug) {
-    print_output(output);
-  }
-
-  // Exit the program
   return 0;
 }
