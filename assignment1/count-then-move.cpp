@@ -13,10 +13,11 @@
 
 using namespace std;
 
-const int NUM_THREADS = 4; // Number of threads
-const int NUM_OF_HASHBITS = 4; // Number of hash bits
+const int NUM_THREADS = 8; // Number of threads
+const int NUM_OF_HASHBITS = 8; // Number of hash bits
 const int NUM_OF_BUCKETS = 1 << NUM_OF_HASHBITS; // Number of buckets
-const int DATA_SIZE = 100; // Size of the data
+const int DATA_SIZE = 1<<24; // Size of the data
+const bool debug = false; // Debug flag
 
 vector<tuple<int64_t, int64_t>> get_data_given_n(int n) {
   vector<tuple<int64_t, int64_t>> data(n);
@@ -167,8 +168,9 @@ int main() {
     th.join();
   }
 
-  // Print the output vector
-  print_output(output);
+  if (debug) {
+    print_output(output);
+  }
 
   // Exit the program
   return 0;
