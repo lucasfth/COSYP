@@ -127,7 +127,7 @@ int main()
   int chunk_size = compute_input_chunk_size(DATA_SIZE);
 
   vector<thread> threads;
-  vector<vector<tuple<int32_t, int32_t>>> buffers(NUM_BUCKETS, vector<tuple<int32_t, int32_t>>(DATA_SIZE));
+  concurrency::concurrent_vector<vector<tuple<int32_t, int32_t>>> buffers(NUM_BUCKETS, vector<tuple<int32_t, int32_t>>(DATA_SIZE));
 
   auto start_time = chrono::high_resolution_clock::now();
 
