@@ -3,6 +3,12 @@
  * The program uses two passes to achieve this. The first pass counts the number of elements in each partition and the
  * second pass moves the elements to the correct position.
  * The numbers are partitioned based on the remainder of the number divided by the number of threads.
+ * @param num_threads The number of threads to use.
+ * @param num_of_hashbits The number of hash bits to use.
+ * @param data_size The size of the data to use.
+ * @param filename The name of the CSV file to append metrics to.
+ * @param debug The debug flag to print debug information.
+ * @return The exit status of the program. Will write to the CSV file.
  */
 
 #include <iostream>
@@ -12,15 +18,11 @@
 #include <tuple>
 #include <atomic>
 #include <chrono>
+#include <iomanip>
+#include <sys/sysinfo.h>
 
 using namespace std;
 using namespace std::chrono;
-
-const int NUM_THREADS = 8;                       // Number of threads
-const int NUM_OF_HASHBITS = 8;                   // Number of hash bits
-const int NUM_OF_BUCKETS = 1 << NUM_OF_HASHBITS; // Number of buckets
-const int DATA_SIZE = 1 << 24;                   // Size of the data
-const bool debug = false;                        // Debug flag
 
 // Use atomic counters for thread-safe operations
 array<atomic<int>, NUM_OF_BUCKETS> counter;
@@ -128,52 +130,129 @@ void print_output(const vector<vector<tuple<int32_t, int32_t>>> &buffers)
 }
 
 /**
+ * Append performance metrics to a CSV file.
+ * @param filename The name of the CSV file.
+ * @param num_threads The number of threads used.
+ * @param num_of_hashbits The number of hash bits used.
+ * @param num_of_buckets The number of buckets used.
+ * @param data_size The size of the data used.
+ * @param duration The duration of the computation.
+ * @param num_cores The number of CPU cores used.
+ * @param memory_used The amount of memory used.
+ */
+void append_metrics_to_csv(const string &filename, int num_threads, int num_of_hashbits, int num_of_buckets, int data_size, double duration, int num_cores, int memory_used)
+{
+  ofstream file;
+  // open file on linux
+  file.open(filename, ios_base::app);
+  if (file.is_open())
+  {
+    file  << num_threads << ","
+          << num_of_hashbits << ","
+          << num_of_buckets << ","
+          << data_size << ","
+          << fixed << setprecision(6) << duration << ","
+          << num_cores << ","
+          << memory_used << endl;
+    file.close();
+  } else {
+    cerr << "Unable to open file: " << filename << endl;
+  }
+}
+
+/**
+ * Print the usage of the program.
+ * @param program_name The name of the program.
+ */
+void print_usage(const char* program_name) {
+  cout << "Usage: " << program_name << " <num_threads> <num_of_hashbits> <data_size> <filename> <debug>" << endl;
+  cout << "Example: " << program_name << " 8 8 16777216 metrics.csv 0" << endl;
+}
+
+/**
+ * Print the parameters of the program.
+ * @param program_name The name of the program.
+ * @param num_threads The number of threads used.
+ * @param num_of_hashbits The number of hash bits used.
+ * @param num_of_buckets The number of buckets used.
+ * @param data_size The size of the data used.
+ * @param filename The name of the CSV file.
+ * @param debug The debug flag.
+ */
+void print_params(const char* program_name, int num_threads, int num_of_hashbits, int num_of_buckets, int data_size, const string &filename, bool debug) {
+  cout << "Running " << program_name << " with the following parameters:" << endl;
+  cout << "\tNumber of threads: " << num_threads << endl;
+  cout << "\tNumber of hash bits: " << num_of_hashbits << endl;
+  cout << "\tNumber of buckets: " << num_of_buckets << endl;
+  cout << "\tData size: " << data_size << endl;
+  cout << "\tOutput file: " << filename << endl;
+  cout << "\tDebug flag: " << debug << endl;
+}
+
+/**
  * Main function to run the program.
  * @return The exit status of the program.
  */
 int main()
 {
-  cout << "Number of available CPU cores: " << thread::hardware_concurrency() << endl;
+  if (argc != 6) {
+    print_usage(argv[0]);
+    return 1;
+  }
+
+  int num_of_threads = stoi(argv[1]);
+  int num_of_hashbits = stoi(argv[2]);
+  int data_size = stoi(argv[3]);
+  string filename = argv[4];
+  bool debug = stoi(argv[5]);
+
+  int num_of_buckets = 1 << num_of_hashbits;
+
+  print_params(argv[0], num_of_threads, num_of_hashbits, num_of_buckets, data_size, filename, debug);
 
   // Initialize atomic counters
-  for (int i = 0; i < NUM_OF_BUCKETS; i++)
-  {
-    counter[i] = 0;
-  }
-
-  auto data = get_data_given_n(DATA_SIZE);
-  int chunk_size = compute_chunk_size(DATA_SIZE);
-
+  counter.fill(0);
+  
+  auto data = get_data_given_n(data_size);
+  int chunk_size = compute_chunk_size(data_size);
+  
   vector<thread> threads;
   // Create output buffers for each partition
-  vector<vector<tuple<int32_t, int32_t>>> buffers(NUM_OF_BUCKETS, vector<tuple<int32_t, int32_t>>(DATA_SIZE / NUM_OF_BUCKETS + 1));
-
-  auto start_time = high_resolution_clock::now();
-
+  vector<vector<tuple<int32_t, int32_t>>> buffers(num_of_buckets, vector<tuple<int32_t, int32_t>>(data_size / num_of_buckets + 1));
+  
+  auto start_time = high_resolution_clock::now(); // ------------------------ START TIME ------------------------
+  
   // Launch threads to process data chunks concurrently
-  for (int i = 0; i < NUM_THREADS; i++)
+  for (int i = 0; i < num_of_threads; i++)
   {
     int start = i * chunk_size;
-    int end = (i == NUM_THREADS - 1) ? DATA_SIZE : start + chunk_size;
+    int end = (i == num_of_threads - 1) ? data_size : start + chunk_size;
     threads.push_back(thread(process_chunk, i, start, end, ref(data), ref(buffers)));
   }
-
+  
   // Wait for all threads to complete
   for (auto &t : threads)
   {
     t.join();
   }
-
-  auto end_time = high_resolution_clock::now();
+  
+  auto end_time = high_resolution_clock::now(); // ------------------------ END TIME ------------------------
   auto duration = duration_cast<milliseconds>(end_time - start_time);
-
-  cout << "Processing time: " << duration.count() << " ms with " << NUM_THREADS << " threads" << endl;
-
+  
   // Print results if debug flag is set
   if (debug)
   {
+    cout << "Number of available CPU cores: " << thread::hardware_concurrency() << endl;
+    cout << "Processing time: " << duration.count() << " ms with " << num_of_threads << " threads" << endl;
     print_output(buffers);
   }
+
+  struct sysinfo memInfo;
+  sysinfo (&memInfo);
+  long memory_used = memInfo.totalram - memInfo.freeram;
+
+  // Append performance metrics to CSV file
+  append_metrics_to_csv("metrics.csv", num_of_threads, num_of_hashbits, num_of_buckets, data_size, duration.count(), thread::hardware_concurrency(), memory_used);
 
   return 0;
 }
