@@ -23,6 +23,7 @@ run-count-then-move: build
 		./build/count-then-move 8 4 16777216 metrics.csv 0; \
 		./build/count-then-move 8 8 8388608 metrics.csv 0; \
 		./build/count-then-move 8 8 16777216 metrics.csv 0; \
+	done
 
 # Declare phony targets to avoid conflicts with files of the same name
 .PHONY: all configure build clean
