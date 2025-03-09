@@ -1,0 +1,22 @@
+# started on Sun Mar  2 12:49:26 2025
+
+
+ Performance counter stats for './build/concurrent-output':
+
+    96,540,206,113      cycles                                                                  (50.00%)
+    67,846,341,361      instructions                     #    0.70  insn per cycle              (60.00%)
+       176,767,584      L1-icache-load-misses                                                   (60.01%)
+     1,436,329,091      L1-dcache-load-misses                                                   (60.02%)
+        21,571,906      LLC-load-misses                                                         (60.02%)
+       698,334,280      cache-misses                                                            (60.02%)
+    66,368,326,509      uops_retired.stall_cycles                                               (40.00%)
+        17,302,325      branch-misses                                                           (39.99%)
+        15,882,624      iTLB-load-misses                                                        (39.99%)
+        15,912,729      dTLB-load-misses                                                        (39.99%)
+
+      43.082420863 seconds time elapsed
+
+      20.354683000 seconds user
+      28.508953000 seconds sys
+
+
