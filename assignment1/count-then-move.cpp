@@ -24,15 +24,18 @@
 using namespace std;
 using namespace std::chrono;
 
-// Use atomic counters for thread-safe operations
-array<atomic<int>, NUM_OF_BUCKETS> counter;
-
-vector<tuple<int32_t, int32_t>> get_data_given_n(int n)
+/**
+ * Get the data given a number.
+ * @param n The number to get the data for.
+ * @param num_of_buckets The number of buckets to use.
+ * @return The data for the number.
+ */
+vector<tuple<int32_t, int32_t>> get_data_given_n(int n, int num_of_buckets)
 {
   vector<tuple<int32_t, int32_t>> data(n);
   for (int32_t i = 0; i < n; i++)
   {
-    auto num = (i + 1) % NUM_OF_BUCKETS;
+    auto num = (i + 1) % num_of_buckets;
     data[i] = tuple<int32_t, int32_t>(i + 1, i + 1);
   }
   return data;
@@ -51,21 +54,23 @@ void do_computation(tuple<int32_t, int32_t> &item)
 /**
  * Get the partition for a number.
  * @param n The number to get the partition for.
+ * @param num_of_buckets The number of buckets to use.
  * @return The partition for the number.
  */
-int get_partition(int32_t n)
+int get_partition(int32_t n, int num_of_buckets)
 {
-  return n % NUM_OF_BUCKETS;
+  return n % num_of_buckets;
 }
 
 /**
  * Compute the chunk size for each thread.
  * @param data_size The size of the data.
+ * @param num_of_threads The number of threads.
  * @return The chunk size for each thread.
  */
-int compute_chunk_size(int data_size)
+int compute_chunk_size(int data_size, int num_of_threads)
 {
-  return data_size / NUM_THREADS;
+  return data_size / num_of_threads;
 }
 
 /**
@@ -113,8 +118,9 @@ void process_chunk(int thread_id, int start, int end,
 /**
  * Print the output vector.
  * @param output The output vector to print.
+ * @param num_of_buckets The number of buckets to use.
  */
-void print_output(const vector<vector<tuple<int32_t, int32_t>>> &buffers)
+void print_output(const vector<vector<tuple<int32_t, int32_t>>> &buffers, int num_of_buckets)
 {
   cout << "Data (first 10 elements from each partition): " << endl;
   for (int i = 0; i < NUM_OF_BUCKETS; i++)
@@ -210,11 +216,13 @@ int main()
 
   print_params(argv[0], num_of_threads, num_of_hashbits, num_of_buckets, data_size, filename, debug);
 
+  // Use atomic counters for thread-safe operations
+  array<atomic<int>, num_of_buckets> counter;
   // Initialize atomic counters
   counter.fill(0);
   
-  auto data = get_data_given_n(data_size);
-  int chunk_size = compute_chunk_size(data_size);
+  auto data = get_data_given_n(data_size, num_of_buckets);
+  int chunk_size = compute_chunk_size(data_size, num_of_threads);
   
   vector<thread> threads;
   // Create output buffers for each partition
