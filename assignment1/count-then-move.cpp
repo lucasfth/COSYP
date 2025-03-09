@@ -253,7 +253,7 @@ int main(int argc, char *argv[])
     counter[i] = 0;
   }
 
-  auto data = get_data_given_n(data_size, num_of_buckets);
+  auto data = get_data_given_n(data_size);
   int chunk_size = compute_chunk_size(data_size, num_of_threads);
 
   vector<thread> threads;
