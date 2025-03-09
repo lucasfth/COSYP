@@ -33,7 +33,7 @@ void do_computation(tuple<int32_t, int32_t> &item)
 vector<tuple<int32_t, int32_t>> get_data_given_n(int n)
 {
   vector<tuple<int32_t, int32_t>> data(n);
-  for (int64_t i = 0; i < n; i++)
+  for (int32_t i = 0; i < n; i++)
   {
     // auto num = (i + 1) % NUM_BUCKETS;
     data[i] = tuple<int32_t, int32_t>(i+1, i+1);
@@ -129,6 +129,7 @@ int main()
   cout << "Initializing data..." << endl;
 
   auto data = get_data_given_n(DATA_SIZE);
+  cout << "Data created with size: " << data.size() << endl;
   int chunk_size = compute_input_chunk_size(DATA_SIZE);
 
   vector<thread> threads;

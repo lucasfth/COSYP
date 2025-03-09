@@ -38,7 +38,7 @@ vector<tuple<int32_t, int32_t>> get_data_given_n(int n, int num_of_buckets)
   vector<tuple<int32_t, int32_t>> data(n);
   for (int32_t i = 0; i < n; i++)
   {
-    auto num = (i + 1) % num_of_buckets;
+    // auto num = (i + 1) % num_of_buckets;
     data[i] = tuple<int32_t, int32_t>(i + 1, i + 1);
   }
   return data;
@@ -255,7 +255,9 @@ int main(int argc, char *argv[])
     counter[i] = 0;
   }
 
+  cout << "sshh" << endl;
   auto data = get_data_given_n(data_size, num_of_buckets);
+  cout << "Data created with size: " << data.size() << endl;
   int chunk_size = compute_chunk_size(data_size, num_of_threads);
 
   vector<thread> threads;
