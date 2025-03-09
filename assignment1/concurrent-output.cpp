@@ -121,7 +121,10 @@ int main()
 
   cout << "Fill counter with 0..." << endl;
   // Initialize counters to 0
-  counter.fill(0);
+  for (int i = 0; i < NUM_BUCKETS; i++)
+  {
+    counter[i] = 0;
+  }
 
   cout << "Initializing data..." << endl;
 
