@@ -133,7 +133,9 @@ int main()
   int chunk_size = compute_input_chunk_size(DATA_SIZE);
 
   vector<thread> threads;
-  vector<vector<tuple<int32_t, int32_t>>> buffers(NUM_BUCKETS, vector<tuple<int32_t, int32_t>>(DATA_SIZE));
+  cout << "Creating output buffers" << endl;
+  vector<vector<tuple<int32_t, int32_t>>> buffers(NUM_BUCKETS, vector<tuple<int32_t, int32_t>>(DATA_SIZE / NUM_BUCKETS + 1));
+  cout << "Output buffers created" << endl;
 
   auto start_time = chrono::high_resolution_clock::now();
   cout << "Finished initializing data..." << endl;
