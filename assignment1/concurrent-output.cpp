@@ -23,7 +23,7 @@ using namespace std;
 using namespace std::chrono;
 
 // Define a maximum number of buckets for the atomic array
-const int NUM_BUCKETS = 256;
+const int MAX_BUCKETS = 256;
 
 // Add some computation to better demonstrate multi-core benefits
 void do_computation(tuple<int32_t, int32_t> &item)
