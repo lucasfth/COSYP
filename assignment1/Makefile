@@ -37,20 +37,20 @@ run-count-then-move: build
 run-concurrent-output: build
 	@echo "Running concurrent-output with different parameters"
 	@for i in 1 2 3; do \
-		./build/concurrent_output 1 8 16777216 metrics.csv 0; \
-		./build/concurrent_output 2 8 16777216 metrics.csv 0; \
-		./build/concurrent_output 4 8 16777216 metrics.csv 0; \
-		./build/concurrent_output 8 8 16777216 metrics.csv 0; \
-		./build/concurrent_output 16 8 16777216 metrics.csv 0; \
-		./build/concurrent_output 32 8 16777216 metrics.csv 0; \
-		./build/concurrent_output 8 1 16777216 metrics.csv 0; \
-		./build/concurrent_output 8 2 16777216 metrics.csv 0; \
-		./build/concurrent_output 8 4 16777216 metrics.csv 0; \
-		./build/concurrent_output 8 8 16777216 metrics.csv 0; \
-		./build/concurrent_output 8 8 4096 metrics.csv 0; \
-		./build/concurrent_output 8 8 65536 metrics.csv 0; \
-		./build/concurrent_output 8 8 1048576 metrics.csv 0; \
-		./build/concurrent_output 8 8 67108864 metrics.csv 0; \
+		./build/concurrent-output 1 8 16777216 metrics.csv 0; \
+		./build/concurrent-output 2 8 16777216 metrics.csv 0; \
+		./build/concurrent-output 4 8 16777216 metrics.csv 0; \
+		./build/concurrent-output 8 8 16777216 metrics.csv 0; \
+		./build/concurrent-output 16 8 16777216 metrics.csv 0; \
+		./build/concurrent-output 32 8 16777216 metrics.csv 0; \
+		./build/concurrent-output 8 1 16777216 metrics.csv 0; \
+		./build/concurrent-output 8 2 16777216 metrics.csv 0; \
+		./build/concurrent-output 8 4 16777216 metrics.csv 0; \
+		./build/concurrent-output 8 8 16777216 metrics.csv 0; \
+		./build/concurrent-output 8 8 4096 metrics.csv 0; \
+		./build/concurrent-output 8 8 65536 metrics.csv 0; \
+		./build/concurrent-output 8 8 1048576 metrics.csv 0; \
+		./build/concurrent-output 8 8 67108864 metrics.csv 0; \
 	done
 
 run-all: build
