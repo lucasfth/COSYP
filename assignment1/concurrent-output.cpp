@@ -270,5 +270,12 @@ int main(int argc, char *argv[])
     print_output(data);
   }
 
+  struct sysinfo memInfo;
+  sysinfo(&memInfo);
+  long memory_used = memInfo.totalram - memInfo.freeram;
+
+  // Append metrics to CSV file using the provided filename
+  append_metrics_to_csv(filename, num_of_threads, num_of_hashbits, num_of_buckets, data_size, duration.count(), thread::hardware_concurrency(), memory_used);
+
   return 0;
 }
