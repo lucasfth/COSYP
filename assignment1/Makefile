@@ -35,20 +35,10 @@ run-concurrent-output: build
 		./build/concurrent-output 16 8 16777216 metrics.csv 0; \
 	done
 
-run-test-all: build
+run-all: build
 	@echo "Running count-then-move and concurrent-output with different parameters"
-	@for i in 1 2 3; do \
-		./build/count-then-move 8 8 16777216 metrics.csv 0; \
-		./build/count-then-move 4 8 16777216 metrics.csv 0; \
-		./build/count-then-move 8 4 16777216 metrics.csv 0; \
-		./build/count-then-move 8 8 8388608 metrics.csv 0; \
-		./build/count-then-move 16 8 16777216 metrics.csv 0; \
-		./build/concurrent-output 8 8 16777216 metrics.csv 0; \
-		./build/concurrent-output 4 8 16777216 metrics.csv 0; \
-		./build/concurrent-output 8 4 16777216 metrics.csv 0; \
-		./build/concurrent-output 8 8 8388608 metrics.csv 0; \
-		./build/concurrent-output 16 8 16777216 metrics.csv 0; \
-	done
+	@$(MAKE) run-count-then-move
+	@$(MAKE) run-concurrent-output
 
 # Declare phony targets to avoid conflicts with files of the same name
 .PHONY: all configure build clean

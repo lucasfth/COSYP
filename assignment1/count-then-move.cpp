@@ -24,6 +24,8 @@
 using namespace std;
 using namespace std::chrono;
 
+const string PROGRAM_NAME = "count-then-move";
+
 // Define a maximum number of buckets for the atomic array
 const int MAX_BUCKETS = 256;
 
@@ -170,7 +172,7 @@ void append_metrics_to_csv(const string &filename, int num_of_threads, int num_o
   file.open(filename, ios_base::app);
   if (file.is_open())
   {
-    file << filename << ","
+    file << PROGRAM_NAME << ","
          << num_of_threads << ","
          << num_of_hashbits << ","
          << num_of_buckets << ","

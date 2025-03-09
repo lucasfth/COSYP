@@ -22,6 +22,8 @@
 using namespace std;
 using namespace std::chrono;
 
+const string PROGRAM_NAME = "concurrent-output";
+
 // Define a maximum number of buckets for the atomic array
 const int MAX_BUCKETS = 256;
 
@@ -189,7 +191,7 @@ void append_metrics_to_csv(const string &filename, int num_of_threads, int num_o
   file.open(filename, ios_base::app);
   if (file.is_open())
   {
-    file << filename << ","
+    file << PROGRAM_NAME << ","
          << num_of_threads << ","
          << num_of_hashbits << ","
          << num_of_buckets << ","
@@ -262,20 +264,6 @@ int main(int argc, char *argv[])
 
   auto end_time = chrono::high_resolution_clock::now();
   auto duration = chrono::duration_cast<chrono::milliseconds>(end_time - start_time);
-  cout << "Processing time: " << duration.count() << " ms with " << num_of_threads << " threads" << endl;
-
-  // Verify results by counting elements in each bucket
-  vector<int> bucket_counts(num_of_buckets, 0);
-  for (int i = 0; i < num_of_buckets; i++)
-  {
-    bucket_counts[i] = counter[i].load();
-  }
-  cout << "Elements per bucket: ";
-  for (int i = 0; i < min(8, num_of_buckets); i++)
-  {
-    cout << bucket_counts[i] << " ";
-  }
-  cout << (num_of_buckets > 8 ? "..." : "") << endl;
 
   if (debug)
   {
