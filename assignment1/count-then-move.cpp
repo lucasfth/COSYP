@@ -78,7 +78,7 @@ int compute_chunk_size(int data_size, int num_of_threads)
  * @param counter The counter to increment.
  * @param id The id of the counter to increment.
  */
-int increment_buffer_counter(array<atomic<int>, num_of_buckets> counter, int id)
+int increment_buffer_counter(array<atomic<int>> counter, int id)
 {
   return counter[id]++;
 }
@@ -89,7 +89,7 @@ int increment_buffer_counter(array<atomic<int>, num_of_buckets> counter, int id)
  * @param item The item to move.
  * @param buffers The buffers to move the item to.
  */
-void move_element(array<atomic<int>, num_of_buckets> counter, const tuple<int32_t, int32_t> &item, vector<vector<tuple<int32_t, int32_t>>> &buffers)
+void move_element(array<atomic<int>> counter, const tuple<int32_t, int32_t> &item, vector<vector<tuple<int32_t, int32_t>>> &buffers)
 {
   int partition = get_partition(get<0>(item));
   int pos = increment_buffer_counter(counter, partition);
@@ -106,7 +106,7 @@ void move_element(array<atomic<int>, num_of_buckets> counter, const tuple<int32_
  * @param data The data to process.
  * @param buffers The buffers to move the data to.
  */
-void process_chunk(array<atomic<int>, num_of_buckets> counter, int thread_id, int start, int end,
+void process_chunk(array<atomic<int>> counter, int thread_id, int start, int end,
                    const vector<tuple<int32_t, int32_t>> &data,
                    vector<vector<tuple<int32_t, int32_t>>> &buffers)
 {
@@ -134,7 +134,7 @@ void process_chunk(array<atomic<int>, num_of_buckets> counter, int thread_id, in
 void print_output(const vector<vector<tuple<int32_t, int32_t>>> &buffers, int num_of_buckets)
 {
   cout << "Data (first 10 elements from each partition): " << endl;
-  for (int i = 0; i < NUM_OF_BUCKETS; i++)
+  for (int i = 0; i < num_of_buckets; i++)
   {
     cout << "Partition " << i << " (size: " << counter[i] << "): ";
     int elements_to_print = min(10, counter[i].load());
