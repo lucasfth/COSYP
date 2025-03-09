@@ -130,7 +130,8 @@ int main()
   vector<vector<tuple<int32_t, int32_t>>> buffers(NUM_BUCKETS, vector<tuple<int32_t, int32_t>>(DATA_SIZE));
 
   auto start_time = chrono::high_resolution_clock::now();
-
+  cout << "Finished initializing data..." << endl;
+  cout << "Processing data with " << NUM_THREADS << " threads..." << endl;
   for (int i = 0; i < NUM_THREADS; i++)
   {
     int start = i * chunk_size;
