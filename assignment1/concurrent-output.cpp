@@ -66,7 +66,7 @@ int get_partition(int32_t n, int num_of_buckets)
  * @param counter The counter to increment.
  * @param id The id of the buffer counter to increment.
  */
-int increment_buffer_counter(array<atomic<int>, MAX_BUCKETS> counter, int id)
+int increment_buffer_counter(array<atomic<int>, MAX_BUCKETS> &counter, int id)
 {
   return counter[id]++;
 }
