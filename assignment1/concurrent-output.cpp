@@ -108,7 +108,8 @@ void move_element(array<atomic<int>, MAX_BUCKETS> &counter, const tuple<int32_t,
  */
 void process_chunk(array<atomic<int>, MAX_BUCKETS> &counter, int thread_id, int start, int end,
                    vector<tuple<int32_t, int32_t>> &data,
-                   vector<vector<tuple<int32_t, int32_t>>> &buffers)
+                   vector<vector<tuple<int32_t, int32_t>>> &buffers
+                   int num_of_buckets)
 {
   // Set thread affinity to specific CPU core
   cpu_set_t cpuset;
@@ -126,16 +127,6 @@ void process_chunk(array<atomic<int>, MAX_BUCKETS> &counter, int thread_id, int 
 }
 
 /**
- * Print the usage of the program.
- * @param program_name The name of the program.
- */
-void print_usage(const char *program_name)
-{
-  cout << "Usage: " << program_name << " <num_of_threads> <num_of_hashbits> <data_size> <filename> <debug>" << endl;
-  cout << "Example: " << program_name << " 8 8 16777216 metrics.csv 0" << endl;
-}
-
-/**
  * Print the output vector.
  * @param output The output vector to print.
  */
@@ -147,6 +138,16 @@ void print_output(const vector<tuple<int32_t, int32_t>> &input)
     cout << "(" << get<0>(input[i]) << ", " << get<1>(input[i]) << ")" << (i == min(19, (int)input.size() - 1) ? " ]..." : ", ");
   }
   cout << endl;
+}
+
+/**
+ * Print the usage of the program.
+ * @param program_name The name of the program.
+ */
+void print_usage(const char *program_name)
+{
+  cout << "Usage: " << program_name << " <num_of_threads> <num_of_hashbits> <data_size> <filename> <debug>" << endl;
+  cout << "Example: " << program_name << " 8 8 16777216 metrics.csv 0" << endl;
 }
 
 /**
@@ -210,8 +211,10 @@ int main()
 
   print_params(argv[0], num_of_threads, num_of_hashbits, num_of_buckets, data_size, filename, debug);
 
+  // Use atomic counters for thread-safe operations with fixed maximum size
+  array<atomic<int>, MAX_BUCKETS> counter;
   // Initialize counters to 0
-  for (int i = 0; i < num_of_buckets; i++)
+  for (int i = 0; i < MAX_BUCKETS; i++)
   {
     counter[i] = 0;
   }

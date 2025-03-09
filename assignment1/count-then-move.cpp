@@ -27,6 +27,16 @@ using namespace std::chrono;
 // Define a maximum number of buckets for the atomic array
 const int MAX_BUCKETS = 256;
 
+// Add some computation to better demonstrate multi-core benefits
+void do_computation(tuple<int32_t, int32_t> &item)
+{
+  // Simple but non-trivial computation
+  for (int i = 0; i < 50; i++)
+  {
+    get<1>(item) = (get<0>(item) * get<1>(item) + i) % 10000;
+  }
+}
+
 /**
  * Get the data given a number.
  * @param n The number to get the data for.
@@ -42,16 +52,6 @@ vector<tuple<int32_t, int32_t>> get_data_given_n(int n)
   return data;
 }
 
-// Add some computation to better demonstrate multi-core benefits
-void do_computation(tuple<int32_t, int32_t> &item)
-{
-  // Simple but non-trivial computation
-  for (int i = 0; i < 50; i++)
-  {
-    get<1>(item) = (get<0>(item) * get<1>(item) + i) % 10000;
-  }
-}
-
 /**
  * Get the partition for a number.
  * @param n The number to get the partition for.
@@ -64,17 +64,6 @@ int get_partition(int32_t n, int num_of_buckets)
 }
 
 /**
- * Compute the chunk size for each thread.
- * @param data_size The size of the data.
- * @param num_of_threads The number of threads.
- * @return The chunk size for each thread.
- */
-int compute_chunk_size(int data_size, int num_of_threads)
-{
-  return data_size / num_of_threads;
-}
-
-/**
  * Atomically increment the counter for a bucket and return the previous value.
  * @param counter The counter to increment.
  * @param id The id of the counter to increment.
@@ -82,6 +71,17 @@ int compute_chunk_size(int data_size, int num_of_threads)
 int increment_buffer_counter(array<atomic<int>, MAX_BUCKETS> &counter, int id)
 {
   return counter[id]++;
+}
+
+/**
+ * Compute the chunk size for each thread.
+ * @param data_size The size of the data.
+ * @param num_of_threads The number of threads.
+ * @return The chunk size for each thread.
+ */
+int compute_input_chunk_size(int data_size, int num_of_threads)
+{
+  return data_size / num_of_threads;
 }
 
 /**
@@ -254,7 +254,7 @@ int main(int argc, char *argv[])
   }
 
   auto data = get_data_given_n(data_size);
-  int chunk_size = compute_chunk_size(data_size, num_of_threads);
+  int chunk_size = compute_input_chunk_size(data_size, num_of_threads);
 
   vector<thread> threads;
   // Create output buffers for each partition
