@@ -24,6 +24,9 @@
 using namespace std;
 using namespace std::chrono;
 
+// Define a maximum number of buckets for the atomic array
+const int MAX_BUCKETS = 256;
+
 /**
  * Get the data given a number.
  * @param n The number to get the data for.
@@ -78,7 +81,7 @@ int compute_chunk_size(int data_size, int num_of_threads)
  * @param counter The counter to increment.
  * @param id The id of the counter to increment.
  */
-int increment_buffer_counter(array<atomic<int>> counter, int id)
+int increment_buffer_counter(array<atomic<int>, MAX_BUCKETS> &counter, int id)
 {
   return counter[id]++;
 }
@@ -88,10 +91,12 @@ int increment_buffer_counter(array<atomic<int>> counter, int id)
  * @param counter The counter to increment.
  * @param item The item to move.
  * @param buffers The buffers to move the item to.
+ * @param num_of_buckets The number of buckets to use.
  */
-void move_element(array<atomic<int>> counter, const tuple<int32_t, int32_t> &item, vector<vector<tuple<int32_t, int32_t>>> &buffers)
+void move_element(array<atomic<int>, MAX_BUCKETS> &counter, const tuple<int32_t, int32_t> &item,
+                  vector<vector<tuple<int32_t, int32_t>>> &buffers, int num_of_buckets)
 {
-  int partition = get_partition(get<0>(item));
+  int partition = get_partition(get<0>(item), num_of_buckets);
   int pos = increment_buffer_counter(counter, partition);
   buffers[partition][pos] = item;
 }
@@ -105,12 +110,13 @@ void move_element(array<atomic<int>> counter, const tuple<int32_t, int32_t> &ite
  * @param end The end index of the chunk.
  * @param data The data to process.
  * @param buffers The buffers to move the data to.
+ * @param num_of_buckets The number of buckets to use.
  */
-void process_chunk(array<atomic<int>> counter, int thread_id, int start, int end,
+void process_chunk(array<atomic<int>, MAX_BUCKETS> &counter, int thread_id, int start, int end,
                    const vector<tuple<int32_t, int32_t>> &data,
-                   vector<vector<tuple<int32_t, int32_t>>> &buffers)
+                   vector<vector<tuple<int32_t, int32_t>>> &buffers,
+                   int num_of_buckets)
 {
-
   // Set thread affinity to specific CPU core
   cpu_set_t cpuset;
   CPU_ZERO(&cpuset);
@@ -122,7 +128,7 @@ void process_chunk(array<atomic<int>> counter, int thread_id, int start, int end
   {
     auto item = data[j];
     do_computation(item); // Do some actual computation
-    move_element(counter, item, buffers);
+    move_element(counter, item, buffers, num_of_buckets);
   }
 }
 
@@ -130,8 +136,10 @@ void process_chunk(array<atomic<int>> counter, int thread_id, int start, int end
  * Print the output vector.
  * @param output The output vector to print.
  * @param num_of_buckets The number of buckets to use.
+ * @param counter The counter to use.
  */
-void print_output(const vector<vector<tuple<int32_t, int32_t>>> &buffers, int num_of_buckets)
+void print_output(const vector<vector<tuple<int32_t, int32_t>>> &buffers, int num_of_buckets,
+                  const array<atomic<int>, MAX_BUCKETS> &counter)
 {
   cout << "Data (first 10 elements from each partition): " << endl;
   for (int i = 0; i < num_of_buckets; i++)
@@ -157,22 +165,24 @@ void print_output(const vector<vector<tuple<int32_t, int32_t>>> &buffers, int nu
  * @param num_cores The number of CPU cores used.
  * @param memory_used The amount of memory used.
  */
-void append_metrics_to_csv(const string &filename, int num_threads, int num_of_hashbits, int num_of_buckets, int data_size, double duration, int num_cores, int memory_used)
+void append_metrics_to_csv(const string &filename, int num_threads, int num_of_hashbits, int num_of_buckets, int data_size, double duration, int num_cores, long memory_used)
 {
   ofstream file;
   // open file on linux
   file.open(filename, ios_base::app);
   if (file.is_open())
   {
-    file  << num_threads << ","
-          << num_of_hashbits << ","
-          << num_of_buckets << ","
-          << data_size << ","
-          << fixed << setprecision(6) << duration << ","
-          << num_cores << ","
-          << memory_used << endl;
+    file << num_threads << ","
+         << num_of_hashbits << ","
+         << num_of_buckets << ","
+         << data_size << ","
+         << fixed << setprecision(6) << duration << ","
+         << num_cores << ","
+         << memory_used << endl;
     file.close();
-  } else {
+  }
+  else
+  {
     cerr << "Unable to open file: " << filename << endl;
   }
 }
@@ -181,7 +191,8 @@ void append_metrics_to_csv(const string &filename, int num_threads, int num_of_h
  * Print the usage of the program.
  * @param program_name The name of the program.
  */
-void print_usage(const char* program_name) {
+void print_usage(const char *program_name)
+{
   cout << "Usage: " << program_name << " <num_threads> <num_of_hashbits> <data_size> <filename> <debug>" << endl;
   cout << "Example: " << program_name << " 8 8 16777216 metrics.csv 0" << endl;
 }
@@ -196,7 +207,8 @@ void print_usage(const char* program_name) {
  * @param filename The name of the CSV file.
  * @param debug The debug flag.
  */
-void print_params(const char* program_name, int num_threads, int num_of_hashbits, int num_of_buckets, int data_size, const string &filename, bool debug) {
+void print_params(const char *program_name, int num_threads, int num_of_hashbits, int num_of_buckets, int data_size, const string &filename, bool debug)
+{
   cout << "Running " << program_name << " with the following parameters:" << endl;
   cout << "\tNumber of threads: " << num_threads << endl;
   cout << "\tNumber of hash bits: " << num_of_hashbits << endl;
@@ -210,9 +222,10 @@ void print_params(const char* program_name, int num_threads, int num_of_hashbits
  * Main function to run the program.
  * @return The exit status of the program.
  */
-int main()
+int main(int argc, char *argv[])
 {
-  if (argc != 6) {
+  if (argc != 6)
+  {
     print_usage(argv[0]);
     return 1;
   }
@@ -224,55 +237,63 @@ int main()
   bool debug = stoi(argv[5]);
 
   int num_of_buckets = 1 << num_of_hashbits;
+  if (num_of_buckets > MAX_BUCKETS)
+  {
+    cerr << "Error: Number of buckets exceeds maximum supported (" << MAX_BUCKETS << ")" << endl;
+    return 1;
+  }
 
   print_params(argv[0], num_of_threads, num_of_hashbits, num_of_buckets, data_size, filename, debug);
 
-  // Use atomic counters for thread-safe operations
-  array<atomic<int>, num_of_buckets> counter;
+  // Use atomic counters for thread-safe operations with fixed maximum size
+  array<atomic<int>, MAX_BUCKETS> counter;
+
   // Initialize atomic counters
-  
-  counter.fill(0);
-  
+  for (int i = 0; i < MAX_BUCKETS; i++)
+  {
+    counter[i] = 0;
+  }
+
   auto data = get_data_given_n(data_size, num_of_buckets);
   int chunk_size = compute_chunk_size(data_size, num_of_threads);
-  
+
   vector<thread> threads;
   // Create output buffers for each partition
   vector<vector<tuple<int32_t, int32_t>>> buffers(num_of_buckets, vector<tuple<int32_t, int32_t>>(data_size / num_of_buckets + 1));
-  
+
   auto start_time = high_resolution_clock::now(); // ------------------------ START TIME ------------------------
-  
+
   // Launch threads to process data chunks concurrently
   for (int i = 0; i < num_of_threads; i++)
   {
     int start = i * chunk_size;
     int end = (i == num_of_threads - 1) ? data_size : start + chunk_size;
-    threads.push_back(thread(process_chunk, counter, i, start, end, ref(data), ref(buffers)));
+    threads.push_back(thread(process_chunk, ref(counter), i, start, end, ref(data), ref(buffers), num_of_buckets));
   }
-  
+
   // Wait for all threads to complete
   for (auto &t : threads)
   {
     t.join();
   }
-  
+
   auto end_time = high_resolution_clock::now(); // ------------------------ END TIME ------------------------
   auto duration = duration_cast<milliseconds>(end_time - start_time);
-  
+
   // Print results if debug flag is set
   if (debug)
   {
     cout << "Number of available CPU cores: " << thread::hardware_concurrency() << endl;
     cout << "Processing time: " << duration.count() << " ms with " << num_of_threads << " threads" << endl;
-    print_output(buffers);
+    print_output(buffers, num_of_buckets, counter);
   }
 
   struct sysinfo memInfo;
-  sysinfo (&memInfo);
+  sysinfo(&memInfo);
   long memory_used = memInfo.totalram - memInfo.freeram;
 
-  // Append performance metrics to CSV file
-  append_metrics_to_csv("metrics.csv", num_of_threads, num_of_hashbits, num_of_buckets, data_size, duration.count(), thread::hardware_concurrency(), memory_used);
+  // Append metrics to CSV file using the provided filename
+  append_metrics_to_csv(filename, num_of_threads, num_of_hashbits, num_of_buckets, data_size, duration.count(), thread::hardware_concurrency(), memory_used);
 
   return 0;
 }
