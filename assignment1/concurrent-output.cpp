@@ -251,7 +251,7 @@ int main(int argc, char *argv[])
   {
     int start = i * chunk_size;
     int end = (i == num_of_threads - 1) ? data_size : start + chunk_size;
-    threads.push_back(thread(process_chunk, counter, i, start, end, ref(data), ref(buffers), num_of_buckets));
+    threads.push_back(thread(process_chunk, ref(counter), i, start, end, ref(data), ref(buffers), num_of_buckets));
   }
 
   // Wait for all threads to complete
