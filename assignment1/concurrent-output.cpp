@@ -151,6 +151,27 @@ void print_usage(const char *program_name)
 }
 
 /**
+ * Print the parameters of the program.
+ * @param program_name The name of the program.
+ * @param num_of_threads The number of threads used.
+ * @param num_of_hashbits The number of hash bits used.
+ * @param num_of_buckets The number of buckets used.
+ * @param data_size The size of the data used.
+ * @param filename The name of the CSV file.
+ * @param debug The debug flag.
+ */
+ void print_params(const char *program_name, int num_of_threads, int num_of_hashbits, int num_of_buckets, int data_size, const string &filename, bool debug)
+ {
+   cout << "Running " << program_name << " with the following parameters:" << endl;
+   cout << "\tNumber of threads: " << num_of_threads << endl;
+   cout << "\tNumber of hash bits: " << num_of_hashbits << endl;
+   cout << "\tNumber of buckets: " << num_of_buckets << endl;
+   cout << "\tData size: " << data_size << endl;
+   cout << "\tOutput file: " << filename << endl;
+   cout << "\tDebug flag: " << debug << endl;
+ }
+
+/**
  * Append performance metrics to a CSV file.
  * @param filename The name of the CSV file.
  * @param num_of_threads The number of threads used.
