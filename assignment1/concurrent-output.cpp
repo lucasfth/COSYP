@@ -28,7 +28,7 @@ const string PROGRAM_NAME = "concurrent-output";
 const int MAX_BUCKETS = 256;
 
 // Add some computation to better demonstrate multi-core benefits
-void do_computation(tuple<int32_t, int32_t> &item)
+void do_computation(tuple<int64_t, int64_t> &item)
 {
   // Simple but non-trivial computation
   for (int i = 0; i < 50; i++)
@@ -42,12 +42,12 @@ void do_computation(tuple<int32_t, int32_t> &item)
  * @param n The number to get the data for.
  * @return The data for the number.
  */
-vector<tuple<int32_t, int32_t>> get_data_given_n(int n)
+vector<tuple<int64_t, int64_t>> get_data_given_n(int n)
 {
-  vector<tuple<int32_t, int32_t>> data(n);
-  for (int32_t i = 0; i < n; i++)
+  vector<tuple<int64_t, int64_t>> data(n);
+  for (int64_t i = 0; i < n; i++)
   {
-    data[i] = tuple<int32_t, int32_t>(i + 1, i + 1);
+    data[i] = tuple<int64_t, int64_t>(i + 1, i + 1);
   }
   return data;
 }
@@ -58,7 +58,7 @@ vector<tuple<int32_t, int32_t>> get_data_given_n(int n)
  * @param num_of_buckets The number of buckets to use.
  * @return The partition for the number.
  */
-int get_partition(int32_t n, int num_of_buckets)
+int get_partition(int64_t n, int num_of_buckets)
 {
   return n % num_of_buckets;
 }
@@ -91,8 +91,8 @@ int compute_input_chunk_size(int data_size, int num_of_threads)
  * @param buffers The buffers to move the data to.
  * @param num_of_buckets The number of buckets to use.
  */
-void move_element(array<atomic<int>, MAX_BUCKETS> &counter, const tuple<int32_t, int32_t> &input_data,
-                  vector<vector<tuple<int32_t, int32_t>>> &buffers, int num_of_buckets)
+void move_element(array<atomic<int>, MAX_BUCKETS> &counter, const tuple<int64_t, int64_t> &input_data,
+                  vector<vector<tuple<int64_t, int64_t>>> &buffers, int num_of_buckets)
 {
   int partition = get_partition(get<0>(input_data), num_of_buckets);
   buffers[partition][increment_buffer_counter(counter, partition)] = input_data;
@@ -109,8 +109,8 @@ void move_element(array<atomic<int>, MAX_BUCKETS> &counter, const tuple<int32_t,
  * @param num_of_buckets The number of buckets to use.
  */
 void process_chunk(array<atomic<int>, MAX_BUCKETS> &counter, int thread_id, int start, int end,
-                   vector<tuple<int32_t, int32_t>> &data,
-                   vector<vector<tuple<int32_t, int32_t>>> &buffers,
+                   vector<tuple<int64_t, int64_t>> &data,
+                   vector<vector<tuple<int64_t, int64_t>>> &buffers,
                    int num_of_buckets)
 {
   // Set thread affinity to specific CPU core
@@ -132,7 +132,7 @@ void process_chunk(array<atomic<int>, MAX_BUCKETS> &counter, int thread_id, int 
  * Print the output vector.
  * @param output The output vector to print.
  */
-void print_output(const vector<tuple<int32_t, int32_t>> &input)
+void print_output(const vector<tuple<int64_t, int64_t>> &input)
 {
   cout << "Data: [ ";
   for (int i = 0; i < min(20, (int)input.size()); i++)
@@ -246,7 +246,7 @@ int main(int argc, char *argv[])
   int chunk_size = compute_input_chunk_size(data_size, num_of_threads);
 
   vector<thread> threads;
-  vector<vector<tuple<int32_t, int32_t>>> buffers(num_of_buckets, vector<tuple<int32_t, int32_t>>(data_size / num_of_buckets + 1));
+  vector<vector<tuple<int64_t, int64_t>>> buffers(num_of_buckets, vector<tuple<int64_t, int64_t>>(data_size / num_of_buckets + 1));
 
   auto start_time = chrono::high_resolution_clock::now();
   for (int i = 0; i < num_of_threads; i++)
