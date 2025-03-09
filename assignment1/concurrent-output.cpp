@@ -123,7 +123,7 @@ void process_chunk(array<atomic<int>, MAX_BUCKETS> &counter, int thread_id, int 
   for (int j = start; j < end; j++)
   {
     auto item = data[j];
-    do_computation(item); // Do some actual computation
+    // do_computation(item); // Do some actual computation
     move_element(counter, item, buffers, num_of_buckets);
   }
 }
