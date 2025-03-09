@@ -3,7 +3,7 @@
  * The program uses two passes to achieve this. The first pass counts the number of elements in each partition and the
  * second pass moves the elements to the correct position.
  * The numbers are partitioned based on the remainder of the number divided by the number of threads.
- * @param num_threads The number of threads to use.
+ * @param num_of_threads The number of threads to use.
  * @param num_of_hashbits The number of hash bits to use.
  * @param data_size The size of the data to use.
  * @param filename The name of the CSV file to append metrics to.
@@ -30,15 +30,13 @@ const int MAX_BUCKETS = 256;
 /**
  * Get the data given a number.
  * @param n The number to get the data for.
- * @param num_of_buckets The number of buckets to use.
  * @return The data for the number.
  */
-vector<tuple<int32_t, int32_t>> get_data_given_n(int n, int num_of_buckets)
+vector<tuple<int32_t, int32_t>> get_data_given_n(int n)
 {
   vector<tuple<int32_t, int32_t>> data(n);
   for (int32_t i = 0; i < n; i++)
   {
-    // auto num = (i + 1) % num_of_buckets;
     data[i] = tuple<int32_t, int32_t>(i + 1, i + 1);
   }
   return data;
@@ -157,7 +155,7 @@ void print_output(const vector<vector<tuple<int32_t, int32_t>>> &buffers, int nu
 /**
  * Append performance metrics to a CSV file.
  * @param filename The name of the CSV file.
- * @param num_threads The number of threads used.
+ * @param num_of_threads The number of threads used.
  * @param num_of_hashbits The number of hash bits used.
  * @param num_of_buckets The number of buckets used.
  * @param data_size The size of the data used.
@@ -165,7 +163,7 @@ void print_output(const vector<vector<tuple<int32_t, int32_t>>> &buffers, int nu
  * @param num_cores The number of CPU cores used.
  * @param memory_used The amount of memory used.
  */
-void append_metrics_to_csv(const string &filename, int num_threads, int num_of_hashbits, int num_of_buckets, int data_size, double duration, int num_cores, long memory_used)
+void append_metrics_to_csv(const string &filename, int num_of_threads, int num_of_hashbits, int num_of_buckets, int data_size, double duration, int num_cores, long memory_used)
 {
   ofstream file;
   // open file on linux
@@ -173,7 +171,7 @@ void append_metrics_to_csv(const string &filename, int num_threads, int num_of_h
   if (file.is_open())
   {
     file << filename << ","
-         << num_threads << ","
+         << num_of_threads << ","
          << num_of_hashbits << ","
          << num_of_buckets << ","
          << data_size << ","
@@ -194,24 +192,24 @@ void append_metrics_to_csv(const string &filename, int num_threads, int num_of_h
  */
 void print_usage(const char *program_name)
 {
-  cout << "Usage: " << program_name << " <num_threads> <num_of_hashbits> <data_size> <filename> <debug>" << endl;
+  cout << "Usage: " << program_name << " <num_of_threads> <num_of_hashbits> <data_size> <filename> <debug>" << endl;
   cout << "Example: " << program_name << " 8 8 16777216 metrics.csv 0" << endl;
 }
 
 /**
  * Print the parameters of the program.
  * @param program_name The name of the program.
- * @param num_threads The number of threads used.
+ * @param num_of_threads The number of threads used.
  * @param num_of_hashbits The number of hash bits used.
  * @param num_of_buckets The number of buckets used.
  * @param data_size The size of the data used.
  * @param filename The name of the CSV file.
  * @param debug The debug flag.
  */
-void print_params(const char *program_name, int num_threads, int num_of_hashbits, int num_of_buckets, int data_size, const string &filename, bool debug)
+void print_params(const char *program_name, int num_of_threads, int num_of_hashbits, int num_of_buckets, int data_size, const string &filename, bool debug)
 {
   cout << "Running " << program_name << " with the following parameters:" << endl;
-  cout << "\tNumber of threads: " << num_threads << endl;
+  cout << "\tNumber of threads: " << num_of_threads << endl;
   cout << "\tNumber of hash bits: " << num_of_hashbits << endl;
   cout << "\tNumber of buckets: " << num_of_buckets << endl;
   cout << "\tData size: " << data_size << endl;
@@ -255,9 +253,7 @@ int main(int argc, char *argv[])
     counter[i] = 0;
   }
 
-  cout << "sshh" << endl;
   auto data = get_data_given_n(data_size, num_of_buckets);
-  cout << "Data created with size: " << data.size() << endl;
   int chunk_size = compute_chunk_size(data_size, num_of_threads);
 
   vector<thread> threads;
