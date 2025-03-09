@@ -75,27 +75,38 @@ int compute_chunk_size(int data_size, int num_of_threads)
 
 /**
  * Atomically increment the counter for a bucket and return the previous value.
+ * @param counter The counter to increment.
+ * @param id The id of the counter to increment.
  */
-int increment_buffer_counter(int id)
+int increment_buffer_counter(array<atomic<int>, num_of_buckets> counter, int id)
 {
   return counter[id]++;
 }
 
 /**
  * Move an element to its destination buffer.
+ * @param counter The counter to increment.
+ * @param item The item to move.
+ * @param buffers The buffers to move the item to.
  */
-void move_element(const tuple<int32_t, int32_t> &item, vector<vector<tuple<int32_t, int32_t>>> &buffers)
+void move_element(array<atomic<int>, num_of_buckets> counter, const tuple<int32_t, int32_t> &item, vector<vector<tuple<int32_t, int32_t>>> &buffers)
 {
   int partition = get_partition(get<0>(item));
-  int pos = increment_buffer_counter(partition);
+  int pos = increment_buffer_counter(counter, partition);
   buffers[partition][pos] = item;
 }
 
 /**
  * Process a chunk of data with affinity to a specific CPU core.
  * This function handles both computation and data movement in a single pass.
+ * @param counter The counter to increment.
+ * @param thread_id The id of the thread.
+ * @param start The start index of the chunk.
+ * @param end The end index of the chunk.
+ * @param data The data to process.
+ * @param buffers The buffers to move the data to.
  */
-void process_chunk(int thread_id, int start, int end,
+void process_chunk(array<atomic<int>, num_of_buckets> counter, int thread_id, int start, int end,
                    const vector<tuple<int32_t, int32_t>> &data,
                    vector<vector<tuple<int32_t, int32_t>>> &buffers)
 {
@@ -111,7 +122,7 @@ void process_chunk(int thread_id, int start, int end,
   {
     auto item = data[j];
     do_computation(item); // Do some actual computation
-    move_element(item, buffers);
+    move_element(counter, item, buffers);
   }
 }
 
@@ -219,6 +230,7 @@ int main()
   // Use atomic counters for thread-safe operations
   array<atomic<int>, num_of_buckets> counter;
   // Initialize atomic counters
+  
   counter.fill(0);
   
   auto data = get_data_given_n(data_size, num_of_buckets);
@@ -235,7 +247,7 @@ int main()
   {
     int start = i * chunk_size;
     int end = (i == num_of_threads - 1) ? data_size : start + chunk_size;
-    threads.push_back(thread(process_chunk, i, start, end, ref(data), ref(buffers)));
+    threads.push_back(thread(process_chunk, counter, i, start, end, ref(data), ref(buffers)));
   }
   
   // Wait for all threads to complete

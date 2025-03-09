@@ -18,9 +18,9 @@ clean:
 run-count-then-move: build
 	@echo "Running count-then-move with different parameters"
 	@for i in 1 2 3 4 5; do \
-		./build/count-then-move 8 8 16777216; metrics.csv 0; \
-		./build/count-then-move 4 8 16777216; metrics.csv 0; \
-		./build/count-then-move 8 4 16777216; metrics.csv 0; \
+		./build/count-then-move 8 8 16777216 metrics.csv 0; \
+		./build/count-then-move 4 8 16777216 metrics.csv 0; \
+		./build/count-then-move 8 4 16777216 metrics.csv 0; \
 		./build/count-then-move 8 8 8388608 metrics.csv 0; \
 		./build/count-then-move 8 8 16777216 metrics.csv 0; \
 
