@@ -108,7 +108,7 @@ void move_element(array<atomic<int>, MAX_BUCKETS> &counter, const tuple<int32_t,
  */
 void process_chunk(array<atomic<int>, MAX_BUCKETS> &counter, int thread_id, int start, int end,
                    vector<tuple<int32_t, int32_t>> &data,
-                   vector<vector<tuple<int32_t, int32_t>>> &buffers
+                   vector<vector<tuple<int32_t, int32_t>>> &buffers,
                    int num_of_buckets)
 {
   // Set thread affinity to specific CPU core
@@ -188,7 +188,7 @@ void append_metrics_to_csv(const string &filename, int num_of_threads, int num_o
  * Main function to run the program.
  * @return The exit status of the program.
  */
-int main()
+int main(int argc, char *argv[])
 {
   if (argc != 6)
   {
