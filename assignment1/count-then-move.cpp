@@ -172,7 +172,8 @@ void append_metrics_to_csv(const string &filename, int num_threads, int num_of_h
   file.open(filename, ios_base::app);
   if (file.is_open())
   {
-    file << num_threads << ","
+    file << filename << ","
+         << num_threads << ","
          << num_of_hashbits << ","
          << num_of_buckets << ","
          << data_size << ","
