@@ -196,7 +196,7 @@ void append_metrics_to_csv(const string &filename, int num_of_threads, int num_o
          << num_of_hashbits << ","
          << num_of_buckets << ","
          << data_size << ","
-         << fixed << setprecision(6) << duration << ","
+         << duration << ","
          << num_cores << ","
          << memory_used << endl;
     file.close();
