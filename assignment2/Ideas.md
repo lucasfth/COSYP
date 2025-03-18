@@ -29,7 +29,7 @@ It will be difficult to reproduce as the hardware was not specified (we can try 
 The languages we want to benchmark are:
 
 - Zig
-- Rust
+- Rust (already mentioned in the paper)
 - Odin
 - Pony
 - If wanting to compare we need:
