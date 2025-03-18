@@ -27,7 +27,7 @@ using namespace std::chrono;
 const string PROGRAM_NAME = "count-then-move";
 
 // Define a maximum number of buckets for the atomic array
-const int MAX_BUCKETS = 256;
+const int MAX_BUCKETS = 1 << 18;
 
 // Add some computation to better demonstrate multi-core benefits
 void do_computation(tuple<int64_t, int64_t> &item)
