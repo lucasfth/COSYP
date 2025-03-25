@@ -1,3 +1,4 @@
+algorithm,threads,hashbits,buckets,data_size,duration,cores,memory
 count-then-move,1,1,2,16777216,2988,32,78723665920
 count-then-move,2,1,2,16777216,3278,32,79052857344
 count-then-move,4,1,2,16777216,1720,32,79265751040
