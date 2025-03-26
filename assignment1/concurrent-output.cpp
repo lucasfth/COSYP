@@ -243,12 +243,12 @@ int main(int argc, char *argv[])
   }
 
   auto data = get_data_given_n(data_size);
+  auto start_time = chrono::high_resolution_clock::now();
   int chunk_size = compute_input_chunk_size(data_size, num_of_threads);
 
   vector<thread> threads;
   vector<vector<tuple<int64_t, int64_t>>> buffers(num_of_buckets, vector<tuple<int64_t, int64_t>>(data_size / num_of_buckets + 1));
 
-  auto start_time = chrono::high_resolution_clock::now();
   for (int i = 0; i < num_of_threads; i++)
   {
     int start = i * chunk_size;
