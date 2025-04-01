@@ -252,12 +252,12 @@ perf-count-then-move: build
 
 perf-concurrent-output: build
 	@echo "Running perf on concurrent-output with different parameters"
-	perf stat -e LLC-load-misses,LLC-store-misses -o perf-ctm-1-18.txt ./build/concurrent-output 1 18 16777216 metrics.csv 0; \
-	perf stat -e LLC-load-misses,LLC-store-misses -o perf-ctm-2-18.txt ./build/concurrent-output 2 18 16777216 metrics.csv 0; \
-	perf stat -e LLC-load-misses,LLC-store-misses -o perf-ctm-4-18.txt ./build/concurrent-output 4 18 16777216 metrics.csv 0; \
-	perf stat -e LLC-load-misses,LLC-store-misses -o perf-ctm-8-18.txt ./build/concurrent-output 8 18 16777216 metrics.csv 0; \
-	perf stat -e LLC-load-misses,LLC-store-misses -o perf-ctm-16-18.txt ./build/concurrent-output 16 18 16777216 metrics.csv 0; \
-	perf stat -e LLC-load-misses,LLC-store-misses -o perf-ctm-32-18.txt ./build/concurrent-output 32 18 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-co-1-18.txt ./build/concurrent-output 1 18 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-co-2-18.txt ./build/concurrent-output 2 18 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-co-4-18.txt ./build/concurrent-output 4 18 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-co-8-18.txt ./build/concurrent-output 8 18 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-co-16-18.txt ./build/concurrent-output 16 18 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-co-32-18.txt ./build/concurrent-output 32 18 16777216 metrics.csv 0; \
 
 run-all: build
 	@echo "Running count-then-move and concurrent-output with different parameters"
