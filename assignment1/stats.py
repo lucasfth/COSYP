@@ -14,9 +14,8 @@ metrics_df['Throughput(MT/s)'] = metrics_df['data_size'] / \
     metrics_df['duration'] / 1000
 
 # Split into two sets based on column "algorithm"
-count_then_move_df = metrics_df[metrics_df['algorithm'] == 'count-then-move']
-concurrent_output_df = metrics_df[metrics_df['algorithm']
-                                  == 'concurrent-output']
+count_then_move_df = metrics_df[metrics_df['algorithm'] == 'count-then-move'].groupby(['algorithm', 'threads', 'hashbits'], as_index=False).mean()
+concurrent_output_df = metrics_df[metrics_df['algorithm'] == 'concurrent-output'].groupby(['algorithm', 'threads', 'hashbits'], as_index=False).mean()
 
 # Create subplots
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6), sharey=True)
@@ -41,9 +40,9 @@ for i, thread in enumerate(sorted(count_then_move_df['threads'].unique())):
              color=colors[i],
              label=f'{thread} threads')
 
-ax1.set_title('(a) Count-then-move')
-ax1.set_xlabel('Hash Bits')
-ax1.set_ylabel('Throughput (MT/s)')
+ax1.set_title('(a) Count-then-move', fontsize=15)
+ax1.set_xlabel('Hash Bits', fontsize=15)
+ax1.set_ylabel('Throughput (MT/s)', fontsize=15)
 ax1.grid(True, linestyle='--', alpha=0.7)
 max_hashbits = max(metrics_df['hashbits'])
 ax1.set_xticks(range(1, max_hashbits + 1))
@@ -58,14 +57,10 @@ if not concurrent_output_df.empty:
                  color=colors[i],
                  label=f'{thread} threads')
 
-    ax2.set_title('(b) Concurrent-output')
-    ax2.set_xlabel('Hash Bits')
-    ax2.grid(True, linestyle='--', alpha=0.7)
-    ax2.set_xticks(range(1, max_hashbits + 1))
-else:
-    ax2.set_title('(b) Concurrent-output (No data)')
-    ax2.set_xlabel('Hash Bits')
-    ax2.grid(True, linestyle='--', alpha=0.7)
+ax2.set_title('(b) Concurrent-output', fontsize=15)
+ax2.set_xlabel('Hash Bits', fontsize=15)
+ax2.grid(True, linestyle='--', alpha=0.7)
+ax2.set_xticks(range(1, max_hashbits + 1))
 
 # Common legend
 handles, labels = ax1.get_legend_handles_labels()
