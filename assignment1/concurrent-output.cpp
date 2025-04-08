@@ -114,11 +114,11 @@ void process_chunk(array<atomic<int>, MAX_BUCKETS> &counter, int thread_id, int 
                    int num_of_buckets)
 {
   // Set thread affinity to specific CPU core
-  cpu_set_t cpuset;
-  CPU_ZERO(&cpuset);
-  // Use modulo in case we have more threads than cores
-  CPU_SET(thread_id % thread::hardware_concurrency(), &cpuset);
-  pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+  // cpu_set_t cpuset;
+  // CPU_ZERO(&cpuset);
+  // // Use modulo in case we have more threads than cores
+  // CPU_SET(thread_id % thread::hardware_concurrency(), &cpuset);
+  // pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
 
   for (int j = start; j < end; j++)
   {
