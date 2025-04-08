@@ -1,0 +1,13 @@
+algorithm,threads,llc-load-misses,llc-store-misses
+concurrent-output,1,2471492,16287568
+concurrent-output,2,1963379,17627090
+concurrent-output,4,2186748,13938059
+concurrent-output,8,796194,7066514
+concurrent-output,16,717825,8015808
+concurrent-output,32,776429,5454828
+count-then-move,1,4795308,17099627
+count-then-move,2,2127329,17693751
+count-then-move,4,1924004,9714248
+count-then-move,8,554762,6968147
+count-then-move,16,497850,7054477
+count-then-move,32,619623,5363440
