@@ -3,7 +3,9 @@ import re
 
 
 lines = ["algorithm,threads,llc-load-misses,llc-store-misses"]
-perf_files = glob.glob("perf-c*")
+ctm_lines = []
+co_lines = []
+perf_files = sorted(glob.glob("perf-c*"), key=lambda x: int(x.split("-")[2]))
 for file in perf_files:
     content = open(file).read().replace(" ", "").replace("\n", "")
     matches = re.search(
@@ -18,6 +20,10 @@ for file in perf_files:
     _, algo, threads, bits = file.replace(".txt", "").split("-")
     algo = "count-then-move" if algo == "ctm" else "concurrent-output"
     line = ",".join([algo, threads, load, store])
-    lines.append(line)
+
+    if algo == "count-then-move":
+        ctm_lines.append(line)
+    else:
+        co_lines.append(line)
 
 open("perf-metrics.csv", "w").write("\n".join(lines))
