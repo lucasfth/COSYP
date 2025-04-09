@@ -259,6 +259,48 @@ perf-concurrent-output: build
 	perf stat -e LLC-load-misses,LLC-store-misses -o perf-co-16-18.txt ./build/concurrent-output 16 18 16777216 metrics.csv 0; \
 	perf stat -e LLC-load-misses,LLC-store-misses -o perf-co-32-18.txt ./build/concurrent-output 32 18 16777216 metrics.csv 0; \
 
+perf-bits-count-then-move: build
+	@echo "Running perf on count-then-move with alternating bits and 32 threads"
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-ctm-32-1.txt ./build/count-then-move 32 1 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-ctm-32-2.txt ./build/count-then-move 32 2 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-ctm-32-3.txt ./build/count-then-move 32 3 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-ctm-32-4.txt ./build/count-then-move 32 4 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-ctm-32-5.txt ./build/count-then-move 32 5 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-ctm-32-6.txt ./build/count-then-move 32 6 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-ctm-32-7.txt ./build/count-then-move 32 7 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-ctm-32-8.txt ./build/count-then-move 32 8 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-ctm-32-9.txt ./build/count-then-move 32 9 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-ctm-32-10.txt ./build/count-then-move 32 10 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-ctm-32-11.txt ./build/count-then-move 32 11 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-ctm-32-12.txt ./build/count-then-move 32 12 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-ctm-32-13.txt ./build/count-then-move 32 13 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-ctm-32-14.txt ./build/count-then-move 32 14 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-ctm-32-15.txt ./build/count-then-move 32 15 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-ctm-32-16.txt ./build/count-then-move 32 16 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-ctm-32-17.txt ./build/count-then-move 32 17 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-ctm-32-18.txt ./build/count-then-move 32 18 16777216 metrics.csv 0; \
+
+perf-bits-concurrent-output: build
+	@echo "Running perf on concurrent-output with alternating bits and 32 threads"
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-co-32-1.txt ./build/concurrent-output 32 1 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-co-32-2.txt ./build/concurrent-output 32 2 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-co-32-3.txt ./build/concurrent-output 32 3 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-co-32-4.txt ./build/concurrent-output 32 4 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-co-32-5.txt ./build/concurrent-output 32 5 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-co-32-6.txt ./build/concurrent-output 32 6 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-co-32-7.txt ./build/concurrent-output 32 7 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-co-32-8.txt ./build/concurrent-output 32 8 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-co-32-9.txt ./build/concurrent-output 32 9 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-co-32-10.txt ./build/concurrent-output 32 10 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-co-32-11.txt ./build/concurrent-output 32 11 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-co-32-12.txt ./build/concurrent-output 32 12 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-co-32-13.txt ./build/concurrent-output 32 13 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-co-32-14.txt ./build/concurrent-output 32 14 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-co-32-15.txt ./build/concurrent-output 32 15 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-co-32-16.txt ./build/concurrent-output 32 16 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-co-32-17.txt ./build/concurrent-output 32 17 16777216 metrics.csv 0; \
+	perf stat -e LLC-load-misses,LLC-store-misses -o perf-co-32-18.txt ./build/concurrent-output 32 18 16777216 metrics.csv 0; \
+
 run-all: build
 	@echo "Running count-then-move and concurrent-output with different parameters"
 	@$(MAKE) run-count-then-move
