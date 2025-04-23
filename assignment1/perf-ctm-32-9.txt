@@ -1,0 +1,14 @@
+# started on Wed Apr  9 23:58:48 2025
+
+
+ Performance counter stats for './build/count-then-move 32 9 16777216 metrics.csv 0':
+
+           812,430      LLC-load-misses                                                       
+         7,596,088      LLC-store-misses                                                      
+
+       6.036551939 seconds time elapsed
+
+      13.791590000 seconds user
+       0.442377000 seconds sys
+
+

@@ -1,0 +1,14 @@
+# started on Thu Apr 10 00:01:28 2025
+
+
+ Performance counter stats for './build/concurrent-output 32 17 16777216 metrics.csv 0':
+
+           933,821      LLC-load-misses                                                       
+         6,377,472      LLC-store-misses                                                      
+
+       5.970826359 seconds time elapsed
+
+      12.456949000 seconds user
+       0.462849000 seconds sys
+
+
