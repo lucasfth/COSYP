@@ -56,6 +56,8 @@ The benchmarks we want to run are:
 | meteor-contest | Search for solutions to shape packing puzzle | 2,098 |
 | thread-ring | Switch from thread to thread passing one token | 50M |
 
+**Implementations** can be found [here](https://benchmarksgame-team.pages.debian.net/benchmarksgame/index.html).
+
 ### Hardware
 
 It will be important to note the machine we are running on.
