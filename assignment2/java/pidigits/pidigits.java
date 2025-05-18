@@ -1,129 +1,123 @@
 /* The Computer Language Benchmarks Game
- * https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
- *
- * Contributed by Michael Ganss
- * derived from PHP version that was
- * contributed by Oleksii Prudkyi
- * port from pidigits.lua-5.lua (Mike Pall, Wim Couwenberg)
- * modified by Craig Russell
- *
- * Original C version by Mr Ledrug
- *
- * ported to Java by Piotr Tarsa
- */
+   https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+ 
+   contributed by Isaac Gouy
+*/
 
- import jextract_gmp.gmp_h;
- import org.graalvm.nativeimage.hosted.Feature;
- import org.graalvm.nativeimage.hosted.RuntimeForeignAccess;
- 
- import java.lang.foreign.Arena;
- import java.lang.foreign.FunctionDescriptor;
- import java.lang.foreign.MemoryLayout;
- import java.lang.foreign.MemorySegment;
- 
- public class pidigits {
-     private static final Arena GLOBAL_ARENA = Arena.global();
- 
-     // Manually written as jextract didn't extract it.
-     // Names and types taken from gmp.h
-     private static final MemoryLayout mpz_t = MemoryLayout.structLayout(
-             gmp_h.C_INT.withName("_mp_alloc"),
-             gmp_h.C_INT.withName("_mp_size"),
-             gmp_h.C_POINTER.withName("_mp_d")
-     ).withName("__mpz_struct");
- 
-     @SuppressWarnings("SameParameterValue")
-     private static MemorySegment alloc(MemoryLayout typeDescription) {
-         return GLOBAL_ARENA.allocate(typeDescription);
-     }
- 
-     public static void main(String[] args) {
-         MemorySegment n1 = alloc(mpz_t),
-                 n2 = alloc(mpz_t),
-                 d = alloc(mpz_t),
-                 u = alloc(mpz_t),
-                 v = alloc(mpz_t),
-                 w = alloc(mpz_t);
-         int k = 1, k2, i = 0;
-         var n = Integer.parseInt(args[0]);
- 
-         gmp_h.__gmpz_init(u);
-         gmp_h.__gmpz_init(v);
- 
-         gmp_h.__gmpz_init_set_si(w, 0);
-         gmp_h.__gmpz_init_set_si(n1, 4);
-         gmp_h.__gmpz_init_set_si(n2, 3);
-         gmp_h.__gmpz_init_set_si(d, 1);
- 
-         var outBuf = new StringBuilder();
- 
-         for (; ; ) {
-             gmp_h.__gmpz_tdiv_q(u, n1, d);
-             gmp_h.__gmpz_tdiv_q(v, n2, d);
- 
-             if (gmp_h.__gmpz_cmp(u, v) == 0) {
-                 outBuf.append(gmp_h.__gmpz_get_si(u));
-                 i++;
-                 if (i % 10 == 0)
-                     outBuf.append("\t:").append(i).append("\n");
-                 if (i == n)
-                     break;
- 
-                 // extract
-                 gmp_h.__gmpz_mul_si(u, u, -10);
-                 gmp_h.__gmpz_mul(u, d, u);
-                 gmp_h.__gmpz_mul_si(n1, n1, 10);
-                 gmp_h.__gmpz_add(n1, n1, u);
-                 gmp_h.__gmpz_mul_si(n2, n2, 10);
-                 gmp_h.__gmpz_add(n2, n2, u);
-             } else {
-                 // produce
-                 k2 = k * 2;
-                 gmp_h.__gmpz_mul_si(u, n1, k2 - 1);
-                 gmp_h.__gmpz_add(v, n2, n2);
-                 gmp_h.__gmpz_mul_si(w, n1, k - 1);
-                 gmp_h.__gmpz_add(n1, u, v);
-                 gmp_h.__gmpz_mul_si(u, n2, k + 2);
-                 gmp_h.__gmpz_add(n2, w, u);
-                 gmp_h.__gmpz_mul_si(d, d, k2 + 1);
-                 k++;
-             }
+import java.math.BigInteger;
+
+public class pidigits {
+   static final int L = 10;
+
+   public static void main(String args[]) { 
+      int n = Integer.parseInt(args[0]);
+      int j = 0;
+   
+      PiDigitSpigot digits = new PiDigitSpigot();
+      
+      while (n > 0){
+         if (n >= L){
+            for (int i=0; i<L; i++) System.out.print( digits.next() );
+            j += L;
+         } else {
+            for (int i=0; i<n; i++) System.out.print( digits.next() );
+            for (int i=n; i<L; i++) System.out.print(" ");  
+            j += n;   
          }
- 
-         if (i % 10 != 0)
-             outBuf.append(" ".repeat(10 - n % 10)).append("\t:").append(n).append("\n");
- 
-         System.out.print(outBuf);
-     }
- }
- 
- class pidigits_ForeignRegistrationFeature implements Feature {
-     public void duringSetup(DuringSetupAccess access) {
-         RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(
-                 gmp_h.C_POINTER
-         ));
-         RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(
-                 gmp_h.C_LONG,
-                 gmp_h.C_POINTER
-         ));
-         RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(
-                 gmp_h.C_POINTER,
-                 gmp_h.C_LONG
-         ));
-         RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.of(
-                 gmp_h.C_INT,
-                 gmp_h.C_POINTER,
-                 gmp_h.C_POINTER
-         ));
-         RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(
-                 gmp_h.C_POINTER,
-                 gmp_h.C_POINTER,
-                 gmp_h.C_POINTER
-         ));
-         RuntimeForeignAccess.registerForDowncall(FunctionDescriptor.ofVoid(
-                 gmp_h.C_POINTER,
-                 gmp_h.C_POINTER,
-                 gmp_h.C_LONG
-         ));
-     }
- }
+         System.out.print("\t:"); System.out.println(j);
+         n -= L;           
+      }               
+   }
+}
+
+
+class PiDigitSpigot {
+   Transformation z, x, inverse;            
+       
+   public PiDigitSpigot(){
+      z = new Transformation(1,0,0,1);
+      x = new Transformation(0,0,0,0);
+      inverse = new Transformation(0,0,0,0);
+   }   
+   
+   public int next(){
+      int y = digit();
+      if (isSafe(y)){ 
+         z = produce(y); return y;
+      } else {
+         z = consume( x.next() ); return next();   
+      }
+   }    
+      
+   public int digit(){
+      return z.extract(3);
+   }        
+   
+   public boolean isSafe(int digit){
+      return digit == z.extract(4);
+   }   
+   
+   public Transformation produce(int i){
+      return ( inverse.qrst(10,-10*i,0,1) ).compose(z);
+   }     
+      
+   public Transformation consume(Transformation a){
+      return z.compose(a);
+   }                   
+} 
+
+
+class Transformation {
+   BigInteger q, r, s, t;
+   int k;              
+       
+   public Transformation(int q, int r, int s, int t){
+      this.q = BigInteger.valueOf(q);
+      this.r = BigInteger.valueOf(r);
+      this.s = BigInteger.valueOf(s);
+      this.t = BigInteger.valueOf(t);                  
+      k = 0;
+   }
+   
+   public Transformation(BigInteger q, BigInteger r, BigInteger s, BigInteger t){
+      this.q = q;
+      this.r = r;
+      this.s = s;
+      this.t = t;                  
+      k = 0;
+   }        
+   
+   public Transformation next(){
+      k++;
+      q = BigInteger.valueOf(k);
+      r = BigInteger.valueOf(4 * k + 2);
+      s = BigInteger.valueOf(0);
+      t = BigInteger.valueOf(2 * k + 1); 
+      return this;                 
+   }      
+   
+   public int extract(int j){
+      BigInteger bigj = BigInteger.valueOf(j);
+      BigInteger numerator = (q.multiply(bigj)).add(r);
+      BigInteger denominator = (s.multiply(bigj)).add(t);                  
+      return ( numerator.divide(denominator) ).intValue();                    
+   }     
+   
+   public Transformation qrst(int q, int r, int s, int t){
+      this.q = BigInteger.valueOf(q);
+      this.r = BigInteger.valueOf(r);
+      this.s = BigInteger.valueOf(s);
+      this.t = BigInteger.valueOf(t); 
+      k = 0;  
+      return this;                             
+   }         
+  
+   public Transformation compose(Transformation a){      
+      return new Transformation(
+         q.multiply(a.q)
+         ,(q.multiply(a.r)).add( (r.multiply(a.t)) ) 
+         ,(s.multiply(a.q)).add( (t.multiply(a.s)) ) 
+         ,(s.multiply(a.r)).add( (t.multiply(a.t)) )                   
+         );                    
+   }          
+}
