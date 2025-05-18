@@ -1,7 +1,7 @@
 build:
 	zig build-exe -O ReleaseFast nbody.zig
 
-run: build
+run:
 	./nbody 50000000
 
 clean:

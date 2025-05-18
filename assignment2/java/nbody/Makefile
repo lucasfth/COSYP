@@ -4,3 +4,7 @@ build:
 
 run:
 	./nbody.run 50000000
+
+clean:
+	rm *.class
+	rm nbody.run

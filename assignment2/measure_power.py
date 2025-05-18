@@ -88,6 +88,14 @@ def main():
                 print(f"🏃 Running {lang}-{name}")
                 run_energy = measure_energy(["make", "run"], cwd=path)
 
+                print("Cleaning...")
+                subprocess.Popen(
+                    ["make", "clean"],
+                    cwd=path,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+
                 results.append(
                     {
                         "lang": lang,
