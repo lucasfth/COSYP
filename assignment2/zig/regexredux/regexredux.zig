@@ -13,7 +13,8 @@ const Regex = struct {
 
         var re_eo: c_int = undefined;
         var re_e: [*c]const u8 = undefined;
-        var pattern_c = @ptrCast([*:0]const u8, pattern);
+        // Prev: var pattern_c = @ptrCast([*:0]const u8, pattern);
+        const pattern_c = @as([*:0]const u8, @ptrCast(pattern.ptr));
 
         const re = c.pcre_compile(pattern_c, 0, &re_e, &re_eo, 0);
         if (re) |ok_re| {
@@ -28,31 +29,38 @@ const Regex = struct {
 };
 
 fn substitute(dst: *std.ArrayList(u8), src: []const u8, pattern: []const u8, replacement: []const u8) !usize {
-    var regex = try Regex.compile(pattern);
+    const regex = try Regex.compile(pattern);
     dst.shrinkRetainingCapacity(0);
 
     var pos: c_int = 0;
     var m: [3]c_int = undefined;
-    while (c.pcre_exec(regex.re, regex.re_ex, src.ptr, @intCast(c_int, src.len), pos, 0, &m[0], 3) >= 0) : (pos = m[1]) {
-        const upos = @intCast(usize, pos);
-        const clen = @intCast(usize, m[0]) - upos;
+    // Prev: while (c.prce_exec(regex.re, regex.re_ex, src.ptr, @intCast(c_int, src.len), pos, 0, &m[0], 3) >= 0) : (pos = m[1]) {
+    //    const upos = @intCast(usize, pos);
+    //    const clen = @intCast(usize, m[0]) - upos;
+    //}
+    while (c.pcre_exec(regex.re, regex.re_ex, src.ptr, @as(c_int, @intCast(src.len)), pos, 0, &m[0], 3) >= 0) : (pos = m[1]) {
+        const upos = @as(usize, @intCast(pos));
+        const clen = @as(usize, @intCast(m[0])) - upos;
         try dst.appendSlice(src[upos .. upos + clen]);
         try dst.appendSlice(replacement);
     }
 
-    const upos = @intCast(usize, pos);
+    // Prev: const upos = @intCast(usize, pos);
+    const upos = @as(usize, @intCast(pos));
     const clen = src.len - upos;
     try dst.appendSlice(src[upos .. upos + clen]);
     return dst.items.len;
 }
 
 fn countMatches(src: []const u8, pattern: []const u8) !usize {
-    var regex = try Regex.compile(pattern);
+    // Prev: var allocator = &gpa.allocator;
+    const regex = try Regex.compile(pattern);
 
     var count: usize = 0;
     var pos: c_int = 0;
     var m: [3]c_int = undefined;
-    while (c.pcre_exec(regex.re, regex.re_ex, src.ptr, @intCast(c_int, src.len), pos, 0, &m[0], 3) >= 0) : (pos = m[1]) {
+    // Prev:     while (c.pcre_exec(regex.re, regex.re_ex, src.ptr, @intCast(c_int, src.len), pos, 0, &m[0], 3) >= 0) : (pos = m[1]) {
+    while (c.pcre_exec(regex.re, regex.re_ex, src.ptr, @as(c_int, @intCast(src.len)), pos, 0, &m[0], 3) >= 0) : (pos = m[1]) {
         count += 1;
     }
 
@@ -80,7 +88,7 @@ const subs = [_][]const u8{
 };
 
 var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-var allocator = &gpa.allocator;
+const allocator = gpa.allocator();
 
 pub fn main() !void {
     var buffered_stdout = std.io.bufferedWriter(std.io.getStdOut().writer());
@@ -101,7 +109,8 @@ pub fn main() !void {
 
     const clen = try substitute(&seq[1], seq[0].items, ">.*|\n", "");
     for (variants) |variant| {
-        _ = try stdout.print("{s} {}\n", .{ variant, countMatches(seq[1].items, variant) });
+        // Prev: _ = try stdout.print("{s} {}\n", .{ variant, countMatches(seq[1].items, variant) });
+        _ = try stdout.print("{s} {!}\n", .{ variant, countMatches(seq[1].items, variant) });
     }
 
     var slen: usize = 0;
