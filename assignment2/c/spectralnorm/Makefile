@@ -1,5 +1,5 @@
 build:
-	gcc -pipe -Wall -O3 -fomit-frame-pointer -march=native -fopenmp spectralnorm.c -o spectralnorm -lm
+	gcc -pipe -Wall -O3 -fomit-frame-pointer -march=native -fopenmp spectralnorm.c -o spectralnorm.out -lm
 
 run:
-	./spectralnorm 5500
+	./spectralnorm.out 5500

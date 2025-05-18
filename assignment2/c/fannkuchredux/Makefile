@@ -1,5 +1,5 @@
 build:
-	gcc -pipe -Wall -O3 -fomit-frame-pointer -march=native -fopenmp fannkuchredux.c -o fannkuchredux
+	gcc -pipe -Wall -O3 -fomit-frame-pointer -march=native -fopenmp fannkuchredux.c -o fannkuchredux.out
 
 run:
-	./fannkuchredux 12
+	./fannkuchredux.out 12

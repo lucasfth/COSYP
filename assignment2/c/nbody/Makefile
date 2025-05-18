@@ -1,5 +1,5 @@
 build:
-	gcc -pipe -Wall -O3 -fomit-frame-pointer -march=native  nbody.c -o nbody -lm
+	gcc -pipe -Wall -O3 -fomit-frame-pointer -march=native  nbody.c -o nbody.out -lm
 
 run:
-	./nbody 50000000
+	./nbody.out 50000000
