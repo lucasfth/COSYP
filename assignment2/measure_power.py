@@ -42,7 +42,7 @@ def measure_energy(cmd, cwd):
     print(f"▶️  Measuring: {' '.join(cmd)} (cwd={cwd})")
     start = time.time()
     process = subprocess.Popen(
-        cmd, cwd=cwd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        cmd, cwd=cwd, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT
     )
 
     while process.poll() is None:
@@ -77,8 +77,6 @@ def main():
     results = []
 
     for name, impls in benchmarks.items():
-        if name != "nbody":
-            continue
         print(f"\n🚀 Benchmark: {name}")
         for lang, path in impls.items():
             try:
@@ -87,14 +85,6 @@ def main():
 
                 print(f"🏃 Running {lang}-{name}")
                 run_energy = measure_energy(["make", "run"], cwd=path)
-
-                print("Cleaning...")
-                subprocess.Popen(
-                    ["make", "clean"],
-                    cwd=path,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                )
 
                 results.append(
                     {
