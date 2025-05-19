@@ -1,6 +1,6 @@
 build:
 	javac -d . -cp .  reversecomplement.java
-	native-image --silent --gc=G1 -cp . -O3 -march=native reversecomplement -o reversecomplement.run
+	native-image --silent --gc=G1 -cp . -O3 -march=native reversecomplement -o reversecomplement.out
 
 run:
-	./reversecomplement.run 0 < ../../input/reversecomplement.input
+	./reversecomplement.out 0 < ../../input/revcomp-input100000001.txt

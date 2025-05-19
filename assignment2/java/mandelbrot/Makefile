@@ -1,6 +1,6 @@
 build:
 	javac -d . -cp .  mandelbrot.java
-	native-image --silent --gc=G1 -cp . -O3 -march=native mandelbrot -o mandelbrot.run
+	native-image --silent --gc=G1 -cp . -O3 -march=native mandelbrot -o mandelbrot.out
 
 run:
-	./mandelbrot.run 16000
+	./mandelbrot.out 16000

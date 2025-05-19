@@ -1,6 +1,6 @@
 build:
 	javac -d . -cp .  pidigits.java
-	native-image --silent --gc=G1 -cp . -O3 -march=native pidigits -o pidigits.run
+	native-image --silent --gc=G1 -cp . -O3 -march=native pidigits -o pidigits.out
 
 run:
-	./pidigits.run 10000
+	./pidigits.out 10000

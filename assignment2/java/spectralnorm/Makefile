@@ -1,6 +1,6 @@
 build:
 	javac -d . -cp .  spectralnorm.java
-	native-image --silent --gc=G1 -cp . -O3 -march=native spectralnorm -o spectralnorm.run
+	native-image --silent --gc=G1 -cp . -O3 -march=native spectralnorm -o spectralnorm.out
 
 run:
-	./reversecomplement.run 5500
+	./spectralnorm.out 5500

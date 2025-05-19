@@ -1,6 +1,6 @@
 build:
 	javac -d . -cp . fasta.java
-	native-image --silent --gc=G1 -cp . -O3 -march=native fasta -o fasta.run
+	native-image --silent --gc=G1 -cp . -O3 -march=native fasta -o fasta.out
 
 run:
-	./fasta.run 25000000
+	./fasta.out 25000000

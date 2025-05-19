@@ -1,10 +1,6 @@
 build:
 	javac -d . -cp .  nbody.java
-	native-image --silent --gc=G1 -cp . -O3 -march=native nbody -o nbody.run
+	native-image --silent --gc=G1 -cp . -O3 -march=native nbody -o nbody.out
 
 run:
-	./nbody.run 50000000
-
-clean:
-	rm *.class
-	rm nbody.run
+	./nbody.out 50000000
