@@ -12,7 +12,7 @@ ROOT_DIR = "."
 CSV_OUTPUT_FILE = "energy_results.csv"
 IDLE_POWER = 1.8 # W
 
-NUM_RUNS = 1
+NUM_RUNS = 10
 
 # ===== FIND EMOJI =====
 
@@ -81,7 +81,7 @@ def measure_energy(cmd, cwd):
 
 def find_benchmark_dirs():
     benchmarks = {}
-    for lang in ["c", "javascript", "typescript", "zig", "ruby"]:
+    for lang in ["c", ,"java", "javascript", "typescript", "zig", "ruby"]:
         lang_dir = os.path.join(ROOT_DIR, lang)
         if not os.path.isdir(lang_dir):
             continue
@@ -98,10 +98,10 @@ def build(benchmarks, results):
     print("🏗️ Building -----------\n")
 
     for name, impls in benchmarks.items():
-        if name != "nbody":
-            continue
 
         for lang, path in impls.items():
+            if lang in ["typescript", "javascript"]:
+                continue
             try:
                 print(f"{find_emoji(lang)} Building {lang}-{name}")
                 build_energy = measure_energy(["make", "build"], cwd=path)
@@ -110,7 +110,7 @@ def build(benchmarks, results):
                     {
                         "lang": lang,
                         "algorithm": name,
-                        "build": round(build_energy, 4),
+                        "energy": round(build_energy, 4),
                         "type": "build",
                     })
             except Exception as e:
@@ -119,7 +119,7 @@ def build(benchmarks, results):
                     {
                         "lang": lang,
                         "algorithm": name,
-                        "build": "failed",
+                        "energy": "failed",
                         "type": "build",
                     }
                 )
@@ -132,8 +132,7 @@ def run(benchmarks, results):
     print("\n\n🏃 Running -----------\n")
 
     for name, impls in benchmarks.items():
-        if name != "nbody":
-            continue
+        print(f"Running {name}")
         
         for lang, path in impls.items():
             total_run_energy = 0.0
@@ -180,3 +179,6 @@ def main():
         writer.writerows(results)
 
     print(f"\n📄 Results written to: {CSV_OUTPUT_FILE}")
+
+if __name__ == "__main__":
+    main()
