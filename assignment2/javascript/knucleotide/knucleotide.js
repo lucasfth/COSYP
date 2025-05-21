@@ -6,11 +6,14 @@
    Contributed by Jesse Millikan
    Modified by Matt Baker
    Ported, modified, and parallelized by Roman Pletnev
+   Modified for Deno compatibility
 */
 
 "use strict";
-var rd = require("readline"),
-  cp = require("child_process");
+
+// DENO MODIFICATION: Remove require statements
+// var rd = require("readline"),
+//  cp = require("child_process");
 
 function RefNum(num) {
   this.num = num;
@@ -38,72 +41,72 @@ function sort(seq, length) {
     keys = Array.from(f.keys()),
     n = seq.length - length + 1,
     res = "";
-  keys.sort((a, b) => f.get(b) - f.get(a));
+  keys.sort((a, b) => f.get(b).num - f.get(a).num);
   for (var key of keys)
-    res += key.toUpperCase() + " " + ((f.get(key) * 100) / n).toFixed(3) + "\n";
+    res +=
+      key.toUpperCase() + " " + ((f.get(key).num * 100) / n).toFixed(3) + "\n";
   res += "\n";
   return res;
 }
 
 function find(seq, s) {
   var f = frequency(seq, s.length);
-  return (f.get(s) || 0) + "\t" + s.toUpperCase() + "\n";
+  var count = f.get(s);
+  return (count ? count.num : 0) + "\t" + s.toUpperCase() + "\n";
 }
 
-function master() {
-  var workers = [];
-  for (var i = 1; i < 5; ++i)
-    workers.push(
-      cp.fork(__filename, [], { silent: true, env: { workerId: i } })
-    );
-  for (var w of workers) process.stdin.pipe(w.stdin);
-  var jobs = workers.length,
-    results = [];
-  var messageHandler = function (i) {
-    return function (message) {
-      results[i] = message;
-      if (!--jobs) {
-        process.stdout.write(results.join(""));
-        process.exit(0);
-      }
-    };
-  };
-  for (var i = 0; i < workers.length; ++i)
-    workers[i].on("message", messageHandler(i));
-}
+// DENO MODIFICATION: Replace worker/master with single-threaded implementation
+async function main() {
+  // Read the entire input
+  const decoder = new TextDecoder();
+  const buffer = new Uint8Array(1024);
+  let input = "";
 
-function worker() {
-  var seq = "",
-    reading = false;
-  var lineHandler = function (line) {
+  while (true) {
+    const readResult = await Deno.stdin.read(buffer);
+    if (readResult === null) break;
+    input += decoder.decode(buffer.subarray(0, readResult), { stream: true });
+  }
+
+  // Process the input line by line
+  const lines = input.split("\n");
+  let seq = "";
+  let reading = false;
+
+  for (const line of lines) {
     if (reading) {
-      if (line[0] !== ">") seq += line;
-    } else reading = line.substr(0, 6) === ">THREE";
-  };
-  rd.createInterface(process.stdin, process.stdout)
-    .on("line", lineHandler)
-    .on("close", function () {
-      var res = "";
-      switch (process.env.workerId) {
-        case "1":
-          res += sort(seq, 1);
-          res += sort(seq, 2);
-          res += find(seq, "ggt");
-          break;
-        case "2":
-          res += find(seq, "ggta");
-          res += find(seq, "ggtatt");
-          break;
-        case "3":
-          res += find(seq, "ggtattttaatt");
-          break;
-        case "4":
-          res += find(seq, "ggtattttaatttatagt");
-          break;
+      if (line[0] !== ">") {
+        seq += line;
       }
-      process.send(res);
-      process.exit();
-    });
+    } else {
+      reading = line.substr(0, 6) === ">THREE";
+    }
+  }
+
+  // Run all analyses in sequence (no parallelism)
+  let results = "";
+
+  // Tasks from worker 1
+  results += sort(seq, 1);
+  results += sort(seq, 2);
+  results += find(seq, "ggt");
+
+  // Tasks from worker 2
+  results += find(seq, "ggta");
+  results += find(seq, "ggtatt");
+
+  // Tasks from worker 3
+  results += find(seq, "ggtattttaatt");
+
+  // Tasks from worker 4
+  results += find(seq, "ggtattttaatttatagt");
+
+  // Output the results
+  console.log(results);
 }
 
-process.env.workerId ? worker() : master();
+// DENO MODIFICATION: Call main instead of determining worker vs master
+main().catch((err) => {
+  console.error("Error:", err);
+  Deno.exit(1);
+});
