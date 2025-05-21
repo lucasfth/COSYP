@@ -1,4 +1,4 @@
 build:
 
 run:
-	deno mandelbrot.ts 16000
+	deno --allow-run mandelbrot.ts 16000
