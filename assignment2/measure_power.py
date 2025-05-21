@@ -60,7 +60,7 @@ def measure_energy(cmd, cwd):
 
 def find_benchmark_dirs():
     benchmarks = {}
-    for lang in ["c", "java"]:
+    for lang in ["c", "java", "javascript", "typescript", "zig"]:
         lang_dir = os.path.join(ROOT_DIR, lang)
         if not os.path.isdir(lang_dir):
             continue
