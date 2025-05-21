@@ -1,5 +1,5 @@
 build:
-	zig build-exe -O ReleaseFast regexredux.zig -lc -lpcre -I/opt/homebrew/include -L/opt/homebrew/lib
+	zig build-exe -O ReleaseFast regexredux.zig -lc -lpcre
 
-run: build
-	./regexredux < ../../input/regexredux-input5000000.txt
+run:
+	./regexredux "../../input/regexredux-input5000000.txt"
