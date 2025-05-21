@@ -12,7 +12,7 @@ ROOT_DIR = "."
 CSV_OUTPUT_FILE = "energy_results.csv"
 IDLE_POWER = 1.8 # W
 
-NUM_RUNS = 2
+NUM_RUNS = 1
 
 # ===== FIND EMOJI =====
 
@@ -24,6 +24,7 @@ def find_emoji(lang):
         "javascript": "🚧",
         "typescript": "🛄",
         "zig": "🦎",
+        "ruby": "💎",
     }
     return emojis.get(lang, "❓")
 
@@ -80,7 +81,7 @@ def measure_energy(cmd, cwd):
 
 def find_benchmark_dirs():
     benchmarks = {}
-    for lang in ["c", "java", "javascript", "typescript", "zig"]:
+    for lang in ["c", "javascript", "typescript", "zig", "ruby"]:
         lang_dir = os.path.join(ROOT_DIR, lang)
         if not os.path.isdir(lang_dir):
             continue
@@ -97,6 +98,9 @@ def build(benchmarks, results):
     print("🏗️ Building -----------\n")
 
     for name, impls in benchmarks.items():
+        if name != "nbody":
+            continue
+
         for lang, path in impls.items():
             try:
                 print(f"{find_emoji(lang)} Building {lang}-{name}")
@@ -106,7 +110,8 @@ def build(benchmarks, results):
                     {
                         "lang": lang,
                         "algorithm": name,
-                        "build_energy": round(build_energy, 4),
+                        "build": round(build_energy, 4),
+                        "type": "build",
                     })
             except Exception as e:
                 print(f"\t❌ Failed for {lang}-{name}: {e}")
@@ -114,7 +119,8 @@ def build(benchmarks, results):
                     {
                         "lang": lang,
                         "algorithm": name,
-                        "build_energy": "failed",
+                        "build": "failed",
+                        "type": "build",
                     }
                 )
 
@@ -126,6 +132,9 @@ def run(benchmarks, results):
     print("\n\n🏃 Running -----------\n")
 
     for name, impls in benchmarks.items():
+        if name != "nbody":
+            continue
+        
         for lang, path in impls.items():
             total_run_energy = 0.0
             successful_runs = 0
@@ -139,9 +148,10 @@ def run(benchmarks, results):
                 {
                     "lang": lang,
                     "algorithm": name,
-                    "run_energy": round(total_run_energy / successful_runs, 4)
+                    "energy": round(total_run_energy / successful_runs, 4)
                     if successful_runs == NUM_RUNS
                     else "failed",
+                    "type": "run",
                 }
             )
 
@@ -162,46 +172,11 @@ def main():
             fieldnames=[
                 "lang",
                 "algorithm",
-                "build_energy",
-                "run_energy",
-                "total_energy",
+                "energy",
+                "type",
             ],
         )
         writer.writeheader()
         writer.writerows(results)
 
     print(f"\n📄 Results written to: {CSV_OUTPUT_FILE}")
-    plot_results(results)
-
-
-# ===== VISUALIZATION =====
-
-
-def plot_results(results, output_file="energy_results.png"):
-    filtered = [r for r in results if r["total_energy"] != "failed"]
-
-    if not filtered:
-        print("⚠️  No successful results to plot.")
-        return
-
-    labels = [f"{r['lang']}-{r['algorithm']}" for r in filtered]
-    build_energy = [r["build_energy"] for r in filtered]
-    run_energy = [r["run_energy"] for r in filtered]
-
-    x = range(len(labels))
-    plt.figure(figsize=(12, 6))
-    plt.barh(x, build_energy, label="Build Energy", color="orange")
-    plt.barh(x, run_energy, left=build_energy,
-             label="Run Energy", color="skyblue")
-
-    plt.yticks(x, labels)
-    plt.xlabel("Energy (Joules)")
-    plt.title("Build vs Run Energy Consumption")
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig(output_file)
-    print(f"📊 Chart saved to: {output_file}")
-
-
-if __name__ == "__main__":
-    main()
