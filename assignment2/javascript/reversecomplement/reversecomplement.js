@@ -9,6 +9,7 @@
     modified by Roman Pletnev
 */
 
+import { Buffer } from 'node:buffer';
 
 const stdout = process.stdout;
 const stdin = process.stdin;
