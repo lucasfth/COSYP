@@ -54,7 +54,7 @@ def read_power():
 def measure_energy(cmd, cwd):
     interval = 0.1  # seconds
     energy = 0.0
-    print(f"▶️  Measuring: {' '.join(cmd)} (cwd={cwd})")
+    print(f"\t▶️  Measuring: {' '.join(cmd)} (cwd={cwd})")
     start = time.time()
     process = subprocess.Popen(
         cmd, cwd=cwd, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT
@@ -67,10 +67,10 @@ def measure_energy(cmd, cwd):
 
     if process.returncode == 0:
         duration = time.time() - start
-        print(f"✅ Finished in {duration:.2f}s, Energy: {energy:.2f} J")
+        print(f"\t✅ Finished in {duration:.2f}s, Energy: {energy:.2f} J")
         return energy
 
-    print(f"❌  Failed with exit code: {process.returncode}")
+    print(f"\t❌  Failed with exit code: {process.returncode}")
     return 0.0
 
 
@@ -108,7 +108,7 @@ def build(benchmarks, results):
                         "build_energy": round(build_energy, 4),
                     })
             except Exception as e:
-                print(f"❌ Failed for {lang}-{name}: {e}")
+                print(f"\t❌ Failed for {lang}-{name}: {e}")
                 results.append(
                     {
                         "lang": lang,
