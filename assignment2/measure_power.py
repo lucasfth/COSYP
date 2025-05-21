@@ -10,6 +10,7 @@ PROMETHEUS_URL = "http://localhost:9090"
 PROMQL = "sum(pi5_volt * ignoring(id) pi5_current)"
 ROOT_DIR = "."
 CSV_OUTPUT_FILE = "energy_results.csv"
+IDLE_POWER = 1.8 # W
 
 NUM_RUNS = 2
 
@@ -62,7 +63,7 @@ def measure_energy(cmd, cwd):
 
     while process.poll() is None:
         power = read_power()
-        energy += power * interval
+        energy += (power-IDLE_POWER) * interval
         time.sleep(interval)
 
     if process.returncode == 0:
