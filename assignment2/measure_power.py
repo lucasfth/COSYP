@@ -15,10 +15,11 @@ NUM_RUNS = 2
 
 # ===== FIND EMOJI =====
 
+
 def find_emoji(lang):
     emojis = {
         "c": "🐀",
-        "java": "",
+        "java": "☕",
         "javascript": "🚧",
         "typescript": "🛄",
         "zig": "🦎",
@@ -63,7 +64,7 @@ def measure_energy(cmd, cwd):
         power = read_power()
         energy += power * interval
         time.sleep(interval)
-    
+
     if process.returncode == 0:
         duration = time.time() - start
         print(f"✅ Finished in {duration:.2f}s, Energy: {energy:.2f} J")
@@ -89,6 +90,8 @@ def find_benchmark_dirs():
     return benchmarks
 
 # ===== BUILD =====
+
+
 def build(benchmarks, results):
     print("🏗️ Building -----------\n")
 
@@ -99,11 +102,11 @@ def build(benchmarks, results):
                 build_energy = measure_energy(["make", "build"], cwd=path)
 
                 results.append(
-                {
-                    "lang": lang,
-                    "algorithm": name,
-                    "build_energy": round(build_energy, 4),
-                })
+                    {
+                        "lang": lang,
+                        "algorithm": name,
+                        "build_energy": round(build_energy, 4),
+                    })
             except Exception as e:
                 print(f"❌ Failed for {lang}-{name}: {e}")
                 results.append(
@@ -116,6 +119,8 @@ def build(benchmarks, results):
 
 # ===== RUN =====
 # And run each benchmark NUM_RUNS times
+
+
 def run(benchmarks, results):
     print("\n\n🏃 Running -----------\n")
 
@@ -138,7 +143,6 @@ def run(benchmarks, results):
                     else "failed",
                 }
             )
-
 
 
 # ===== MAIN =====
@@ -186,7 +190,8 @@ def plot_results(results, output_file="energy_results.png"):
     x = range(len(labels))
     plt.figure(figsize=(12, 6))
     plt.barh(x, build_energy, label="Build Energy", color="orange")
-    plt.barh(x, run_energy, left=build_energy, label="Run Energy", color="skyblue")
+    plt.barh(x, run_energy, left=build_energy,
+             label="Run Energy", color="skyblue")
 
     plt.yticks(x, labels)
     plt.xlabel("Energy (Joules)")
