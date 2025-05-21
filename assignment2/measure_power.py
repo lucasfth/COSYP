@@ -95,7 +95,7 @@ def build(benchmarks, results):
     for name, impls in benchmarks.items():
         for lang, path in impls.items():
             try:
-                print(f"{find_emoji(lang)} Buiding {lang}-{name}")
+                print(f"{find_emoji(lang)} Building {lang}-{name}")
                 build_energy = measure_energy(["make", "build"], cwd=path)
 
                 results.append(
