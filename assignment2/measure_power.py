@@ -11,6 +11,8 @@ PROMQL = "sum(pi5_volt * ignoring(id) pi5_current)"
 ROOT_DIR = "."
 CSV_OUTPUT_FILE = "energy_results.csv"
 
+NUM_RUNS = 2
+
 # ===== FIND EMOJI =====
 
 def find_emoji(lang):
@@ -86,32 +88,22 @@ def find_benchmark_dirs():
                 benchmarks.setdefault(name, {})[lang] = bench_dir
     return benchmarks
 
-
-# ===== MAIN =====
-def main():
-    benchmarks = find_benchmark_dirs()
-    results = []
+# ===== BUILD =====
+def build(benchmarks, results):
+    print("🏗️ Building -----------\n")
 
     for name, impls in benchmarks.items():
-        print(f"\n🚀 Benchmark: {name}")
         for lang, path in impls.items():
             try:
-                print(f"🔨 Building {lang}-{name}")
+                print(f"{find_emoji(lang)} Buiding {lang}-{name}")
                 build_energy = measure_energy(["make", "build"], cwd=path)
 
-                print(f"{find_emoji(lang)} Running {lang}-{name}")
-                run_energy = measure_energy(["make", "run"], cwd=path)
-
                 results.append(
-                    {
-                        "lang": lang,
-                        "algorithm": name,
-                        "build_energy": round(build_energy, 4),
-                        "run_energy": round(run_energy, 4),
-                        "total_energy": round(build_energy + run_energy, 4),
-                    }
-                )
-
+                {
+                    "lang": lang,
+                    "algorithm": name,
+                    "build_energy": round(build_energy, 4),
+                })
             except Exception as e:
                 print(f"❌ Failed for {lang}-{name}: {e}")
                 results.append(
@@ -119,10 +111,44 @@ def main():
                         "lang": lang,
                         "algorithm": name,
                         "build_energy": "failed",
-                        "run_energy": "failed",
-                        "total_energy": "failed",
                     }
                 )
+
+# ===== RUN =====
+# And run each benchmark NUM_RUNS times
+def run(benchmarks, results):
+    print("\n\n🏃 Running -----------\n")
+
+    for name, impls in benchmarks.items():
+        for lang, path in impls.items():
+            total_run_energy = 0.0
+            successful_runs = 0
+            for _ in range(NUM_RUNS):
+                print(f"{find_emoji(lang)} Running {lang}-{name}")
+                run_energy = measure_energy(["make", "run"], cwd=path)
+                if run_energy > 0:
+                    total_run_energy += run_energy
+                    successful_runs += 1
+            results.append(
+                {
+                    "lang": lang,
+                    "algorithm": name,
+                    "run_energy": round(total_run_energy / successful_runs, 4)
+                    if successful_runs == NUM_RUNS
+                    else "failed",
+                }
+            )
+
+
+
+# ===== MAIN =====
+def main():
+    benchmarks = find_benchmark_dirs()
+    results = []
+
+    build(benchmarks, results)
+
+    run(benchmarks, results)
 
     # Write CSV
     with open(CSV_OUTPUT_FILE, mode="w", newline="") as f:
