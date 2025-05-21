@@ -1,4 +1,4 @@
 build:
 
 run:
-	node mandelbrot.ts 16000
+	deno mandelbrot.ts 16000

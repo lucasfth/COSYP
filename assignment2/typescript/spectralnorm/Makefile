@@ -1,4 +1,4 @@
 build:
 
 run:
-	node spectralnorm.ts 5500
+	deno spectralnorm.ts 5500

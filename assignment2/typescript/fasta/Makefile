@@ -1,4 +1,4 @@
 build:
 
 run:
-	node fasta.ts 25000000
+	deno fasta.ts 25000000

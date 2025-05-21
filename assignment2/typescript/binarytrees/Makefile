@@ -1,4 +1,4 @@
 build:
 
 run:
-	node binarytrees.ts 21
+	deno binarytrees.ts 21
