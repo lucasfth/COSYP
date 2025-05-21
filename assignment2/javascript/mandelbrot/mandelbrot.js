@@ -4,7 +4,6 @@
    http://benchmarksgame.alioth.debian.org/
 
    contributed by Andreas Schmelz 2016-02-14
-   adapted for Deno by GitHub Copilot 2025
 */
 
 /*
