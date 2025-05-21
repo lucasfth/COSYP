@@ -11,6 +11,18 @@ PROMQL = "sum(pi5_volt * ignoring(id) pi5_current)"
 ROOT_DIR = "."
 CSV_OUTPUT_FILE = "energy_results.csv"
 
+# ===== FIND EMOJI =====
+
+def find_emoji(lang):
+    emojis = {
+        "c": "🐀",
+        "java": "",
+        "javascript": "🚧",
+        "typescript": "🛄",
+        "zig": "🦎",
+    }
+    return emojis.get(lang, "❓")
+
 # ===== POWER MEASUREMENT VIA PROMETHEUS =====
 
 
@@ -83,7 +95,7 @@ def main():
                 print(f"🔨 Building {lang}-{name}")
                 build_energy = measure_energy(["make", "build"], cwd=path)
 
-                print(f"🏃 Running {lang}-{name}")
+                print(f"{find_emoji(lang)} Running {lang}-{name}")
                 run_energy = measure_energy(["make", "run"], cwd=path)
 
                 results.append(
