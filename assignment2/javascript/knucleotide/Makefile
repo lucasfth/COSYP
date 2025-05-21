@@ -1,4 +1,4 @@
 build:
 
 run:
-	node knucleotide.js < ../../input/knucleotide-input25000000.txt
+	deno knucleotide.js < ../../input/knucleotide-input25000000.txt

@@ -1,4 +1,4 @@
 build:
 
 run:
-	node binarytrees.js 21
+	deno binarytrees.js 21

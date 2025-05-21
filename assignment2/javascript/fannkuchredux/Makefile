@@ -1,4 +1,4 @@
 build:
 
 run:
-	node fannkuchredux.js 12
+	deno fannkuchredux.js 12

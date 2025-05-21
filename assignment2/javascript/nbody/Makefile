@@ -1,4 +1,4 @@
 build:
 
 run:
-	node nbody.js 50000000
+	deno nbody.js 50000000

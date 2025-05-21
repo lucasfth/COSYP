@@ -1,4 +1,4 @@
 build:
 
 run:
-	node mandelbrot.js 16000
+	deno --allow-run mandelbrot.js 16000

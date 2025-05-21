@@ -1,4 +1,4 @@
 build:
 
 run:
-	node pidigits.js 10000
+	deno pidigits.js 10000
