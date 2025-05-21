@@ -3,7 +3,3 @@ build:
 
 run: build
 	./regexredux < ../../input/regexredux-input5000000.txt
-
-clean:
-	rm -f regexredux
-	rm -f regexredux.o

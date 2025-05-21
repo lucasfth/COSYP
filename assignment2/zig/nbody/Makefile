@@ -3,7 +3,3 @@ build:
 
 run:
 	./nbody 50000000
-
-clean:
-	rm -f nbody
-	rm -f nbody.o
