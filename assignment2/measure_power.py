@@ -81,7 +81,7 @@ def measure_energy(cmd, cwd):
 
 def find_benchmark_dirs():
     benchmarks = {}
-    for lang in ["c", ,"java", "javascript", "typescript", "zig", "ruby"]:
+    for lang in ["c","java", "javascript", "typescript", "zig", "ruby"]:
         lang_dir = os.path.join(ROOT_DIR, lang)
         if not os.path.isdir(lang_dir):
             continue
@@ -133,7 +133,7 @@ def run(benchmarks, results):
 
     for name, impls in benchmarks.items():
         print(f"Running {name}")
-        
+
         for lang, path in impls.items():
             total_run_energy = 0.0
             successful_runs = 0
