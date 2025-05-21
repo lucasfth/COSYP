@@ -7,7 +7,8 @@
 */
 
 const cluster = require('cluster');
-const numCPUs = require('os').cpus().length * 2;
+// Prev const numCPUs = require('os').cpus().length * 2;
+var numCPUs = require('os').cpus().length * 2;
 var fs = require('fs');
 
 const d = parseInt(process.argv[2]) || 200;
@@ -16,9 +17,14 @@ if (d % 8 != 0) {
   console.error('d must be multiple of 8');
   process.exit(-1);
 }
-if (d * d / numCPUs % 8 != 0) {
-  console.error('cannot distribute equal across cpus');
-  process.exit(-1);
+// Prev
+// if (d * d / numCPUs % 8 != 0) {
+//   console.error('cannot distribute equal across cpus');
+//   process.exit(-1);
+// }
+
+while (d * d / numCPUs % 8 != 0) {
+  numCPUs--;
 }
 
 if (cluster.isMaster) {

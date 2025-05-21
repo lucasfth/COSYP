@@ -7,3 +7,4 @@ run: build
 clean:
 	rm -f knucleotide
 	rm -f knucleotide.o
+	

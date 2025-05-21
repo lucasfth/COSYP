@@ -1,5 +1,5 @@
 build:
-	zig build-exe -O ReleaseFast pidigits.zig
+	zig build-exe -O ReleaseFast pidigits.zig -lc
 
 run: build
 	./pidigits 10000

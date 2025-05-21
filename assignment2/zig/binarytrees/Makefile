@@ -1,5 +1,5 @@
 build: 
-	zig build-exe -O ReleaseFast binarytrees.zig
+	zig build-exe -O ReleaseFast binarytrees.zig -lc
 
 run: build
 	./binarytrees 21

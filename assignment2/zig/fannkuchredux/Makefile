@@ -1,5 +1,5 @@
 build:
-	zig build-exe -O ReleaseFast fannkuchredux.zig
+	zig build-exe -O ReleaseFast fannkuchredux.zig -lc
 
 run: build
 	./fannkuchredux 12
