@@ -61,10 +61,14 @@ def measure_energy(cmd, cwd):
         power = read_power()
         energy += power * interval
         time.sleep(interval)
+    
+    if process.returncode == 0:
+        duration = time.time() - start
+        print(f"✅ Finished in {duration:.2f}s, Energy: {energy:.2f} J")
+        return energy
 
-    duration = time.time() - start
-    print(f"✅ Finished in {duration:.2f}s, Energy: {energy:.2f} J")
-    return energy
+    print(f"❌  Failed with exit code: {process.returncode}")
+    return 0.0
 
 
 # ===== BENCHMARK DISCOVERY =====
