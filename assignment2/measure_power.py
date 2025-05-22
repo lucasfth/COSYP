@@ -12,7 +12,7 @@ ROOT_DIR = "."
 CSV_OUTPUT_FILE = "energy_results.csv"
 IDLE_POWER = 1.8 # W
 
-NUM_RUNS = 10
+NUM_RUNS = 2
 
 # ===== FIND EMOJI =====
 
