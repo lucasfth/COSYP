@@ -1,1 +1,5 @@
-rm **/*\.class & rm **/*\.out
+#!/bin/zsh
+
+rm **/*.class
+rm **/*.out
+rm **/*.o
