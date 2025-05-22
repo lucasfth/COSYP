@@ -1,5 +1,5 @@
 build:
-	zig build-exe -O ReleaseFast nbody.zig
+	zig build-exe -O ReleaseFast nbody.zig -femit-bin=nbody.out
 
 run:
-	./nbody 50000000
+	./nbody.out 50000000

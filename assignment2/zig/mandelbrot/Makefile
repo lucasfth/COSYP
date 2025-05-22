@@ -1,5 +1,5 @@
 build:
-	zig build-exe -O ReleaseFast mandelbrot.zig -lc
+	zig build-exe -O ReleaseFast mandelbrot.zig -lc -femit-bin=mandelbrot.out
 
 run:
-	./mandelbrot 16000
+	./mandelbrot.out 16000

@@ -1,5 +1,5 @@
 build:
-	zig build-exe -O ReleaseFast fannkuchredux.zig -lc
+	zig build-exe -O ReleaseFast fannkuchredux.zig -lc -femit-bin=fannkuchredux.out
 
 run:
-	./fannkuchredux 12
+	./fannkuchredux.out 12

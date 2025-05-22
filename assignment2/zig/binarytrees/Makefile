@@ -1,5 +1,5 @@
 build: 
-	zig build-exe -O ReleaseFast binarytrees.zig -lc
+	zig build-exe -O ReleaseFast binarytrees.zig -lc -femit-bin=binarytrees.out
 
 run:
-	./binarytrees 21
+	./binarytrees.out 21

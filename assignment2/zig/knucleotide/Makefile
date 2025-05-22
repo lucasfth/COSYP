@@ -1,6 +1,6 @@
 build:
-	zig build-exe -O ReleaseFast knucleotide.zig -lc
+	zig build-exe -O ReleaseFast knucleotide.zig -lc -femit-bin=knucleotide.out
 
 run:
-	./knucleotide "../../input/knucleotide-input25000000.txt"
-	
+	./knucleotide.out "../../input/knucleotide-input25000000.txt"
+

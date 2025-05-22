@@ -1,5 +1,5 @@
 build:
-	zig build-exe -O ReleaseFast regexredux.zig -lc -lpcre
+	zig build-exe -O ReleaseFast regexredux.zig -lc -lpcre -femit-bin=regexredux.out
 
 run:
-	./regexredux 0 < ../../input/regexredux-input5000000.txt
+	./regexredux.out 0 < ../../input/regexredux-input5000000.txt

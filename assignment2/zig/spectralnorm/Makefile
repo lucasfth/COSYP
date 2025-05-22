@@ -1,5 +1,5 @@
 build:
-	zig build-exe -O ReleaseFast spectralnorm.zig -lc
+	zig build-exe -O ReleaseFast spectralnorm.zig -lc -femit-bin=spectralnorm.out
 
 run:
-	./spectralnorm 5500
+	./spectralnorm.out 5500

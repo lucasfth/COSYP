@@ -1,5 +1,5 @@
 build:
-	zig build-exe -O ReleaseFast fasta.zig
+	zig build-exe -O ReleaseFast fasta.zig -femit-bin=fasta.out
 
 run:
-	./fasta 25000000
+	./fasta.out 25000000
