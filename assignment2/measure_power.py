@@ -70,10 +70,10 @@ def measure_energy(cmd, cwd):
     if process.returncode == 0:
         duration = time.time() - start
         print(f"\t✅ Finished in {duration:.2f}s, Energy: {energy:.2f} J")
-        return energy
+        return (energy, duration)
 
     print(f"\t❌  Failed with exit code: {process.returncode}")
-    return 0.0
+    return (0.0, 0.0)
 
 
 # ===== BENCHMARK DISCOVERY =====
@@ -104,7 +104,7 @@ def build(benchmarks, results):
                 continue
             try:
                 print(f"{find_emoji(lang)} Building {lang}-{name}")
-                build_energy = measure_energy(["make", "build"], cwd=path)
+                build_energy, build_duration = measure_energy(["make", "build"], cwd=path)
 
                 results.append(
                     {
@@ -112,6 +112,7 @@ def build(benchmarks, results):
                         "algorithm": name,
                         "energy": round(build_energy, 4),
                         "type": "build",
+                        "duration": round(build_duration, 4)
                     })
             except Exception as e:
                 print(f"\t❌ Failed for {lang}-{name}: {e}")
@@ -121,6 +122,7 @@ def build(benchmarks, results):
                         "algorithm": name,
                         "energy": "failed",
                         "type": "build",
+                        "duration": 0.0
                     }
                 )
 
@@ -136,13 +138,15 @@ def run(benchmarks, results):
 
         for lang, path in impls.items():
             total_run_energy = 0.0
+            total_run_duration = 0.0
             successful_runs = 0
             for _ in range(NUM_RUNS):
                 print(f"{find_emoji(lang)} Running {lang}-{name}")
-                run_energy = measure_energy(["make", "run"], cwd=path)
+                run_energy, run_duration = measure_energy(["make", "run"], cwd=path)
                 if run_energy > 0:
                     total_run_energy += run_energy
                     successful_runs += 1
+                    total_run_duration += run_duration
             results.append(
                 {
                     "lang": lang,
@@ -151,6 +155,7 @@ def run(benchmarks, results):
                     if successful_runs == NUM_RUNS
                     else "failed",
                     "type": "run",
+                    "duration": round(total_run_duration / successful_runs, 4)
                 }
             )
 
@@ -173,6 +178,7 @@ def main():
                 "algorithm",
                 "energy",
                 "type",
+                "duration"
             ],
         )
         writer.writeheader()
