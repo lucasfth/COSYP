@@ -13,12 +13,12 @@ RELATIVE_RUN_PLOT_FILE = f"{OUTPUT_DIR}/relative_run_energy.png"
 
 # Define a consistent color palette for languages
 LANGUAGE_COLORS = {
-    'c': '#1f77b4',       # blue
-    'java': '#ff7f0e',    # orange
-    'javascript': '#2ca02c',  # green
-    'typescript': '#d62728',  # red
-    'zig': '#9467bd',     # purple
-    'ruby': '#8c564b'     # brown
+    'c': '#BF71FF',       # blue
+    'java': '#C0FFEE',    #
+    'javascript': '#F7E018',  # yellow
+    'typescript': '#2E79C7',  # blue
+    'zig': '#F7A41E',     # yellowish
+    'ruby': '#D91405'     # red
     # Add more languages and colors as needed
 }
 
@@ -30,6 +30,7 @@ def load_and_preprocess_data(csv_file):
 
     # Convert 'energy' column to numeric, coercing 'failed' to NaN
     df['energy'] = pd.to_numeric(df['energy'], errors='coerce')
+    df['power'] = pd.to_numeric(df['energy'], errors='coerce') / pd.to_numeric(df['duration'], errors='coerce')
 
     # Drop rows where energy is NaN (i.e., 'failed' runs)
     df_cleaned = df.dropna(subset=['energy']).copy()
