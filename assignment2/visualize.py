@@ -14,7 +14,7 @@ RELATIVE_RUN_PLOT_FILE = f"{OUTPUT_DIR}/relative_run_energy.png"
 # Define a consistent color palette for languages
 LANGUAGE_COLORS = {
     'c': '#BF71FF',       # blue
-    'java': '#4F3C30',    #
+    'java': '#4F3C30',    # c0ffee
     'javascript': '#F7E018',  # yellow
     'typescript': '#2E79C7',  # blue
     'zig': '#F7A41E',     # yellowish
