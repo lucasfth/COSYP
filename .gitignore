@@ -45,3 +45,5 @@ assignment2/input/*
 *.csv
 *.png
 *.tex
+*.class
+*.out
