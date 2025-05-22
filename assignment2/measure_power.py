@@ -151,11 +151,11 @@ def run(benchmarks, results):
                 {
                     "lang": lang,
                     "algorithm": name,
-                    "energy": round(total_run_energy / successful_runs, 4)
+                    "energy": round(total_run_energy / successful_runs, 4),
+                    "duration": round(total_run_duration / successful_runs, 4)
                     if successful_runs == NUM_RUNS
                     else "failed",
-                    "type": "run",
-                    "duration": round(total_run_duration / successful_runs, 4)
+                    "type": "run"
                 }
             )
 
