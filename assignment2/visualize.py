@@ -11,6 +11,17 @@ RUN_PLOT_FILE = f"{OUTPUT_DIR}/run_energy_comparison.png"
 TOTAL_PLOT_FILE = f"{OUTPUT_DIR}/total_energy_comparison.png"
 RELATIVE_RUN_PLOT_FILE = f"{OUTPUT_DIR}/relative_run_energy.png"
 
+# Define a consistent color palette for languages
+LANGUAGE_COLORS = {
+    'c': '#1f77b4',       # blue
+    'java': '#ff7f0e',    # orange
+    'javascript': '#2ca02c',  # green
+    'typescript': '#d62728',  # red
+    'zig': '#9467bd',     # purple
+    'ruby': '#8c564b'     # brown
+    # Add more languages and colors as needed
+}
+
 # --- Data Loading and Preprocessing ---
 
 
@@ -46,7 +57,13 @@ def create_bar_chart(df, energy_type, title, filename):
 
     # Plotting
     fig, ax = plt.subplots(figsize=(14, 8))
-    pivot_df.plot(kind='bar', ax=ax, width=0.8)
+
+    # Extract colors for the languages present in this dataset
+    colors = [LANGUAGE_COLORS.get(lang, f'C{i}')
+              for i, lang in enumerate(pivot_df.columns)]
+
+    # Plot with consistent colors
+    pivot_df.plot(kind='bar', ax=ax, width=0.8, color=colors)
 
     # Set logarithmic scale for y-axis
     ax.set_yscale('log')
@@ -98,7 +115,13 @@ def create_relative_run_chart(df, filename):
 
     # Plotting
     fig, ax = plt.subplots(figsize=(14, 8))
-    df_relative.plot(kind='bar', ax=ax, width=0.8)
+
+    # Extract colors for the languages present in this dataset
+    colors = [LANGUAGE_COLORS.get(lang, f'C{i}')
+              for i, lang in enumerate(df_relative.columns)]
+
+    # Plot with consistent colors
+    df_relative.plot(kind='bar', ax=ax, width=0.8, color=colors)
 
     # Set logarithmic scale for y-axis
     ax.set_yscale('log')
