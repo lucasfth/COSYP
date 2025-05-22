@@ -100,7 +100,7 @@ def build(benchmarks, results):
     for name, impls in benchmarks.items():
 
         for lang, path in impls.items():
-            if lang in ["typescript", "javascript"]:
+            if lang in ["typescript", "javascript", "ruby"]:
                 continue
             try:
                 print(f"{find_emoji(lang)} Building {lang}-{name}")
