@@ -12,7 +12,7 @@ ROOT_DIR = "."
 CSV_OUTPUT_FILE = "energy_results.csv"
 IDLE_POWER = 1.8 # W
 
-NUM_RUNS = 2
+NUM_RUNS = 10
 
 # ===== FIND EMOJI =====
 
@@ -147,17 +147,27 @@ def run(benchmarks, results):
                     total_run_energy += run_energy
                     successful_runs += 1
                     total_run_duration += run_duration
-            results.append(
-                {
-                    "lang": lang,
-                    "algorithm": name,
-                    "energy": round(total_run_energy / successful_runs, 4),
-                    "duration": round(total_run_duration / successful_runs, 4)
-                    if successful_runs == NUM_RUNS
-                    else "failed",
-                    "type": "run"
-                }
-            )
+            if successful_runs == 0:
+                print(f"\t❌  Failed for {lang}-{name}")
+                results.append(
+                    {
+                        "lang": lang,
+                        "algorithm": name,
+                        "energy": "failed",
+                        "duration": 0.0,
+                        "type": "run"
+                    }
+                )
+            else:
+                results.append(
+                    {
+                        "lang": lang,
+                        "algorithm": name,
+                        "energy": round(total_run_energy / successful_runs, 4),
+                        "duration": round(total_run_duration / successful_runs, 4),
+                        "type": "run",
+                    }
+                )
 
 
 # ===== MAIN =====
