@@ -30,7 +30,8 @@ def load_and_preprocess_data(csv_file):
 
     # Convert 'energy' column to numeric, coercing 'failed' to NaN
     df['energy'] = pd.to_numeric(df['energy'], errors='coerce')
-    df['power'] = pd.to_numeric(df['energy'], errors='coerce') / pd.to_numeric(df['duration'], errors='coerce')
+    df['power'] = pd.to_numeric(
+        df['energy'], errors='coerce') / pd.to_numeric(df['duration'], errors='coerce')
 
     # Drop rows where energy is NaN (i.e., 'failed' runs)
     df_cleaned = df.dropna(subset=['energy']).copy()
@@ -141,6 +142,184 @@ def create_relative_run_chart(df, filename):
     print(f"📊 Saved relative run energy plot to {filename}")
     plt.close(fig)
 
+
+def generate_latex_tables(df, output_file):
+    """
+    Generates LaTeX tables showing energy usage by language and algorithm.
+    """
+    # Make sure we're working with numeric data
+    df = df.copy()
+    df['energy'] = pd.to_numeric(df['energy'], errors='coerce')
+
+    # Group by language and type, then sum across algorithms
+    lang_summary = df.groupby(['lang', 'type'])['energy'].sum().reset_index()
+    lang_summary_pivot = lang_summary.pivot(
+        index='lang', columns='type', values='energy')
+
+    # Add a total column
+    if 'build' in lang_summary_pivot.columns and 'run' in lang_summary_pivot.columns:
+        lang_summary_pivot['total'] = lang_summary_pivot['build'].fillna(
+            0) + lang_summary_pivot['run'].fillna(0)
+
+    # Round values for readability
+    lang_summary_pivot = lang_summary_pivot.round(2)
+
+    # Create LaTeX table by language - with better formatting
+    lang_table = lang_summary_pivot.to_latex(
+        float_format="%.2f",
+        na_rep="-",
+        index_names=False,  # Don't show "lang" as index name
+        caption="Energy Usage by Language (Joules)",
+        label="tab:energy_by_language"
+    )
+
+    # Group by algorithm and type, then sum across languages
+    algo_summary = df.groupby(['algorithm', 'type'])[
+        'energy'].sum().reset_index()
+    algo_summary_pivot = algo_summary.pivot(
+        index='algorithm', columns='type', values='energy')
+
+    # Add a total column
+    if 'build' in algo_summary_pivot.columns and 'run' in algo_summary_pivot.columns:
+        algo_summary_pivot['total'] = algo_summary_pivot['build'].fillna(
+            0) + algo_summary_pivot['run'].fillna(0)
+
+    # Round values for readability
+    algo_summary_pivot = algo_summary_pivot.round(2)
+
+    # Create LaTeX table by algorithm - with better formatting
+    algo_table = algo_summary_pivot.to_latex(
+        float_format="%.2f",
+        na_rep="-",
+        index_names=False,  # Don't show "algorithm" as index name
+        caption="Energy Usage by Algorithm (Joules)",
+        label="tab:energy_by_algorithm"
+    )
+
+    # Create detailed table with each language-algorithm combination
+    detailed = df.pivot_table(
+        index=['lang', 'algorithm'],
+        columns='type',
+        values='energy',
+        aggfunc='sum'
+    )
+
+    # Add a total column
+    if 'build' in detailed.columns and 'run' in detailed.columns:
+        detailed['total'] = detailed['build'].fillna(
+            0) + detailed['run'].fillna(0)
+
+    # Round values
+    detailed = detailed.round(2)
+
+    # Create LaTeX table for detailed view - with better formatting
+    detailed_table = detailed.to_latex(
+        float_format="%.2f",
+        na_rep="-",
+        multirow=True,  # Use multirow for the hierarchical index
+        caption="Detailed Energy Usage by Language and Algorithm (Joules)",
+        label="tab:detailed_energy"
+    )
+
+    # Write all tables to the output file
+    with open(output_file, 'w') as f:
+        f.write("% Energy Usage Tables for LaTeX\n\n")
+
+        # Language summary table
+        f.write("\\begin{table}[htbp]\n")
+        f.write("\\centering\n")
+        f.write("\\caption{Energy Usage by Language (Joules)}\n")
+        f.write("\\label{tab:energy_by_language}\n")
+        f.write("\\begin{tabular}{lrrr}\n")
+        f.write("\\toprule\n")
+        f.write("Language & Build & Run & Total \\\\\n")
+        f.write("\\midrule\n")
+
+        # Add rows manually for better control
+        for lang in sorted(lang_summary_pivot.index):
+            row = lang_summary_pivot.loc[lang]
+            build_val = f"{row.get('build', 0):.2f}" if 'build' in row and not pd.isna(
+                row['build']) else "-"
+            run_val = f"{row.get('run', 0):.2f}" if 'run' in row and not pd.isna(
+                row['run']) else "-"
+            total_val = f"{row.get('total', 0):.2f}" if 'total' in row and not pd.isna(
+                row['total']) else "-"
+
+            f.write(f"{lang} & {build_val} & {run_val} & {total_val} \\\\\n")
+
+        f.write("\\bottomrule\n")
+        f.write("\\end{tabular}\n")
+        f.write("\\end{table}\n\n")
+
+        # Algorithm summary table
+        f.write("\\begin{table}[htbp]\n")
+        f.write("\\centering\n")
+        f.write("\\caption{Energy Usage by Algorithm (Joules)}\n")
+        f.write("\\label{tab:energy_by_algorithm}\n")
+        f.write("\\begin{tabular}{lrrr}\n")
+        f.write("\\toprule\n")
+        f.write("Algorithm & Build & Run & Total \\\\\n")
+        f.write("\\midrule\n")
+
+        # Add rows manually for better control
+        for algo in sorted(algo_summary_pivot.index):
+            row = algo_summary_pivot.loc[algo]
+            build_val = f"{row.get('build', 0):.2f}" if 'build' in row and not pd.isna(
+                row['build']) else "-"
+            run_val = f"{row.get('run', 0):.2f}" if 'run' in row and not pd.isna(
+                row['run']) else "-"
+            total_val = f"{row.get('total', 0):.2f}" if 'total' in row and not pd.isna(
+                row['total']) else "-"
+
+            f.write(f"{algo} & {build_val} & {run_val} & {total_val} \\\\\n")
+
+        f.write("\\bottomrule\n")
+        f.write("\\end{tabular}\n")
+        f.write("\\end{table}\n\n")
+
+        # For the detailed table, let's also create a manual version
+        f.write("\\begin{table}[htbp]\n")
+        f.write("\\centering\n")
+        f.write(
+            "\\caption{Detailed Energy Usage by Language and Algorithm (Joules)}\n")
+        f.write("\\label{tab:detailed_energy}\n")
+        f.write("\\begin{tabular}{llrrr}\n")
+        f.write("\\toprule\n")
+        f.write("Language & Algorithm & Build & Run & Total \\\\\n")
+        f.write("\\midrule\n")
+
+        # Group by language to create a more organized table
+        for lang in sorted(detailed.index.get_level_values('lang').unique()):
+            lang_rows = detailed.xs(lang, level='lang')
+            first_row = True
+
+            for algo in sorted(lang_rows.index):
+                row = lang_rows.loc[algo]
+                build_val = f"{row.get('build', 0):.2f}" if 'build' in row and not pd.isna(
+                    row['build']) else "-"
+                run_val = f"{row.get('run', 0):.2f}" if 'run' in row and not pd.isna(
+                    row['run']) else "-"
+                total_val = f"{row.get('total', 0):.2f}" if 'total' in row and not pd.isna(
+                    row['total']) else "-"
+
+                if first_row:
+                    f.write(
+                        f"{lang} & {algo} & {build_val} & {run_val} & {total_val} \\\\\n")
+                    first_row = False
+                else:
+                    f.write(
+                        f" & {algo} & {build_val} & {run_val} & {total_val} \\\\\n")
+
+            # Add a midrule between languages
+            if lang != sorted(detailed.index.get_level_values('lang').unique())[-1]:
+                f.write("\\midrule\n")
+
+        f.write("\\bottomrule\n")
+        f.write("\\end{tabular}\n")
+        f.write("\\end{table}\n")
+
+    print(f"📄 LaTeX tables saved to {output_file}")
+
 # --- Main Execution ---
 
 
@@ -165,6 +344,10 @@ def main():
 
     # 4. Plot Relative Run Energy (to C)
     create_relative_run_chart(df_cleaned, RELATIVE_RUN_PLOT_FILE)
+
+    # 5. Generate LaTeX Tables
+    LATEX_OUTPUT_FILE = f"{OUTPUT_DIR}/energy_usage_tables.tex"
+    generate_latex_tables(df_cleaned, LATEX_OUTPUT_FILE)
 
 
 if __name__ == "__main__":
