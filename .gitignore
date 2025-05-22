@@ -44,3 +44,4 @@ assignment2/input/*
 .venv/
 *.csv
 *.png
+*.tex
